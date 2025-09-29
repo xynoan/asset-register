@@ -10,9 +10,10 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('employees.store'), {
-            onSuccess: () => {
-                // Form will redirect to employees.index automatically
-                // The redirect is handled in the controller
+            onSuccess: (response) => {
+                console.log('Database content:', response);
+                // Reset form after successful save
+                reset();
             },
             onError: (errors) => {
                 console.log('Validation errors:', errors);

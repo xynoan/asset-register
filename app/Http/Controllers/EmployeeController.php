@@ -6,10 +6,12 @@ use App\Http\Requests\StoreEmployeeRequest;
 use App\Models\Employee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
 
 class EmployeeController extends Controller
 {
@@ -38,7 +40,7 @@ class EmployeeController extends Controller
     /**
      * Store a newly created employee in storage.
      */
-    public function store(StoreEmployeeRequest $request): RedirectResponse
+    public function store(StoreEmployeeRequest $request): JsonResponse
     {
         $validated = $request->validated();
         
@@ -55,8 +57,17 @@ class EmployeeController extends Controller
             'updated_by' => Auth::id() ?? 1,
         ]);
 
-        return redirect()->route('employees.index')
-            ->with('success', 'Employee created successfully!');
+        $employees = Employee::with(['creator', 'updater'])->get();
+        $users = User::all();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee created successfully!',
+            'database' => [
+                'employees' => $employees,
+                'users' => $users,
+            ]
+        ]);
     }
 
     /**
