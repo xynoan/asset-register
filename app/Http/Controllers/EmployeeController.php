@@ -18,11 +18,19 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the employees.
      */
-    public function index(): Response
+    public function index(Request $request)
     {
         $employees = Employee::with(['creator', 'updater'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => $employees,
+                'message' => 'Employees retrieved successfully'
+            ]);
+        }
 
         return Inertia::render('Employees/Index', [
             'employees' => $employees,
@@ -95,7 +103,7 @@ class EmployeeController extends Controller
     /**
      * Update the specified employee in storage.
      */
-    public function update(StoreEmployeeRequest $request, Employee $employee): RedirectResponse
+    public function update(StoreEmployeeRequest $request, Employee $employee): JsonResponse
     {
         $validated = $request->validated();
         
@@ -107,19 +115,24 @@ class EmployeeController extends Controller
             'updated_by' => Auth::id() ?? 1,
         ]);
 
-        return redirect()->route('employees.index')
-            ->with('success', 'Employee updated successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee updated successfully!',
+            'data' => $employee->load(['creator', 'updater'])
+        ]);
     }
 
     /**
      * Remove the specified employee from storage.
      */
-    public function destroy(Employee $employee): RedirectResponse
+    public function destroy(Employee $employee): JsonResponse
     {
         $employee->delete();
 
-        return redirect()->route('employees.index')
-            ->with('success', 'Employee deleted successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Employee deleted successfully!'
+        ]);
     }
 
     /**
