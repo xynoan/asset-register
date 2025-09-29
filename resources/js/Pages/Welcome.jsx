@@ -19,12 +19,16 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                 <form class="w-50 border border-black rounded-5 p-5">
                     <p class="fw-bold fs-3">Asset Register</p>
                     <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">Full Name</label>
-                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
+                        <label for="exampleInputEmail1" class="form-label">First Name</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder='John' />
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleInputEmail1" class="form-label">Last Name</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder='Doe' />
                     </div>
                     <div class="mb-3">
                         <label for="exampleInputPassword1" class="form-label">Birth Date</label>
-                        <input type="password" class="form-control" id="exampleInputPassword1" />
+                        <input type="date" class="form-control" id="exampleInputPassword1" />
                     </div>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </form>
