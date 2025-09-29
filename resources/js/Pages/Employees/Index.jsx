@@ -7,9 +7,9 @@ export default function Index({ employees }) {
             <div className="container mt-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Employees</h1>
-                    <Link href={route('employees.create')} className="btn btn-primary">
+                    {/* <Link href={route('employees.create')} className="btn btn-primary">
                         Add New Employee
-                    </Link>
+                    </Link> */}
                 </div>
 
                 {employees.data.length === 0 ? (
