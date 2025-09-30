@@ -90,12 +90,6 @@ export default function Index({ employees, flash }) {
                         {/* Pagination links */}
                     </div>
                 )}
-
-                <div className="mt-4">
-                    <Link href="/" className="btn btn-secondary">
-                        Back to Home
-                    </Link>
-                </div>
             </div>
         </>
     );
