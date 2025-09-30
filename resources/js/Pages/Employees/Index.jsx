@@ -86,8 +86,30 @@ export default function Index({ employees, flash }) {
                 )}
 
                 {employees.links && (
-                    <div className="d-flex justify-content-center">
-                        {/* Pagination links */}
+                    <div>
+                        <nav>
+                            <ul className="pagination">
+                                {employees.links.map((link, idx) => (
+                                    <li
+                                        key={idx}
+                                        className={`page-item${link.active ? ' active' : ''}${!link.url ? ' disabled' : ''}`}
+                                    >
+                                        {link.url ? (
+                                            <Link
+                                                href={link.url}
+                                                className="page-link"
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                            />
+                                        ) : (
+                                            <span
+                                                className="page-link"
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                            />
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </nav>
                     </div>
                 )}
             </div>
