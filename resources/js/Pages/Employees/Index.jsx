@@ -42,7 +42,7 @@ export default function Index({ employees }) {
                                         </td>
                                         <td>{new Date(employee.created_at).toLocaleDateString()}</td>
                                         <td>
-                                            {/* <Link 
+                                            <Link 
                                                 href={route('employees.show', employee.id)} 
                                                 className="btn btn-sm btn-outline-primary me-2"
                                             >
@@ -50,10 +50,16 @@ export default function Index({ employees }) {
                                             </Link>
                                             <Link 
                                                 href={route('employees.edit', employee.id)} 
-                                                className="btn btn-sm btn-outline-secondary"
+                                                className="btn btn-sm btn-outline-secondary me-2"
                                             >
                                                 Edit
-                                            </Link> */}
+                                            </Link>
+                                            <Link 
+                                                href={route('employees.edit', employee.id)} 
+                                                className="btn btn-sm btn-outline-danger"
+                                            >
+                                                Delete
+                                            </Link>
                                         </td>
                                     </tr>
                                 ))}
