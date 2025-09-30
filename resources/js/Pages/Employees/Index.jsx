@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import moment from 'moment';
 
 export default function Index({ employees }) {
     return (
@@ -34,13 +35,13 @@ export default function Index({ employees }) {
                                     <tr key={employee.id}>
                                         <td>{employee.employee_no}</td>
                                         <td>{employee.full_name}</td>
-                                        <td>{new Date(employee.birth_date).toLocaleDateString()}</td>
+                                    <td>{moment(employee.birth_date).format('DD/MM/YYYY')}</td>
                                         <td>
                                             <span className={`badge ${employee.status === 'active' ? 'bg-success' : 'bg-secondary'}`}>
                                                 {employee.status}
                                             </span>
                                         </td>
-                                        <td>{new Date(employee.created_at).toLocaleDateString()}</td>
+                                    <td>{moment(employee.created_at).format('DD/MM/YYYY')}</td>
                                         <td>
                                             <Link 
                                                 href={route('employees.show', employee.id)} 
