@@ -48,14 +48,14 @@ class EmployeeController extends Controller
     /**
      * Store a newly created employee in storage.
      */
-    public function store(StoreEmployeeRequest $request): JsonResponse
+    public function store(StoreEmployeeRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        
+
         $employeeNo = $this->generateEmployeeNumber();
-        
+
         $fullName = trim($validated['first_name'] . ' ' . $validated['last_name']);
-        
+
         Employee::create([
             'employee_no' => $employeeNo,
             'full_name' => $fullName,
@@ -65,17 +65,8 @@ class EmployeeController extends Controller
             'updated_by' => Auth::id() ?? 1,
         ]);
 
-        $employees = Employee::with(['creator', 'updater'])->get();
-        $users = User::all();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Employee created successfully!',
-            'database' => [
-                'employees' => $employees,
-                'users' => $users,
-            ]
-        ]);
+        return redirect()->route('employees.index')
+            ->with('success', 'Employee created successfully!');
     }
 
     /**
@@ -106,9 +97,9 @@ class EmployeeController extends Controller
     public function update(StoreEmployeeRequest $request, Employee $employee): JsonResponse
     {
         $validated = $request->validated();
-        
+
         $fullName = trim($validated['first_name'] . ' ' . $validated['last_name']);
-        
+
         $employee->update([
             'full_name' => $fullName,
             'birth_date' => $validated['birth_date'],
@@ -142,7 +133,7 @@ class EmployeeController extends Controller
     {
         $prefix = 'EMP';
         $year = date('Y');
-        
+
         $lastEmployee = Employee::where('employee_no', 'like', $prefix . $year . '%')
             ->orderBy('employee_no', 'desc')
             ->first();
