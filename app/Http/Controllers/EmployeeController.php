@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEmployeeRequest;
+use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -94,7 +95,7 @@ class EmployeeController extends Controller
     /**
      * Update the specified employee in storage.
      */
-    public function update(StoreEmployeeRequest $request, Employee $employee): JsonResponse
+    public function update(UpdateEmployeeRequest $request, Employee $employee)
     {
         $validated = $request->validated();
 
@@ -106,24 +107,34 @@ class EmployeeController extends Controller
             'updated_by' => Auth::id() ?? 1,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Employee updated successfully!',
-            'data' => $employee->load(['creator', 'updater'])
-        ]);
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee updated successfully!',
+                'data' => $employee->load(['creator', 'updater'])
+            ]);
+        }
+
+        return redirect()->route('employees.show', $employee)
+            ->with('success', 'Employee updated successfully!');
     }
 
     /**
      * Remove the specified employee from storage.
      */
-    public function destroy(Employee $employee): JsonResponse
+    public function destroy(Request $request, Employee $employee)
     {
         $employee->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Employee deleted successfully!'
-        ]);
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee deleted successfully!'
+            ]);
+        }
+
+        return redirect()->route('employees.index')
+            ->with('success', 'Employee deleted successfully!');
     }
 
     /**

@@ -1,16 +1,31 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import moment from 'moment';
 
-export default function Index({ employees }) {
+export default function Index({ employees, flash }) {
+    const { delete: destroy, processing } = useForm();
+
+    const handleDelete = (employeeId, employeeName) => {
+        if (confirm(`Are you sure you want to delete employee "${employeeName}"? This action cannot be undone.`)) {
+            destroy(route('employees.destroy', employeeId));
+        }
+    };
+
     return (
         <>
             <Head title="Employees" />
             <div className="container mt-5">
+                {flash?.success && (
+                    <div className="alert alert-success alert-dismissible fade show" role="alert">
+                        {flash.success}
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                )}
+                
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Employees</h1>
-                    {/* <Link href={route('employees.create')} className="btn btn-primary">
+                    <Link href={route('employees.create')} className="btn btn-primary">
                         Add New Employee
-                    </Link> */}
+                    </Link>
                 </div>
 
                 {employees.data.length === 0 ? (
@@ -55,12 +70,13 @@ export default function Index({ employees }) {
                                             >
                                                 Edit
                                             </Link>
-                                            <Link 
-                                                href={route('employees.edit', employee.id)} 
+                                            <button 
+                                                onClick={() => handleDelete(employee.id, employee.full_name)}
                                                 className="btn btn-sm btn-outline-danger"
+                                                disabled={processing}
                                             >
                                                 Delete
-                                            </Link>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
