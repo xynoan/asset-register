@@ -104,22 +104,6 @@ export default function Edit({ employee }) {
                                 )}
                             </div>
 
-                            <div className="mb-3">
-                                <label className="form-label fw-bold">Employee Number:</label>
-                                <p className="form-control-plaintext">{employee.employee_no}</p>
-                                <small className="text-muted">Employee number cannot be changed.</small>
-                            </div>
-
-                            <div className="mb-3">
-                                <label className="form-label fw-bold">Status:</label>
-                                <p className="form-control-plaintext">
-                                    <span className={`badge ${employee.status === 'active' ? 'bg-success' : 'bg-secondary'}`}>
-                                        {employee.status}
-                                    </span>
-                                </p>
-                                <small className="text-muted">Status cannot be changed from this form.</small>
-                            </div>
-                            
                             <div className="d-flex justify-content-between">
                                 <button 
                                     type="submit" 
