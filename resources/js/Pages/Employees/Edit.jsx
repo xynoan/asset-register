@@ -1,4 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import moment from 'moment';
 
 export default function Edit({ employee }) {
     const { data, setData, put, processing, errors, reset } = useForm({
@@ -92,7 +93,7 @@ export default function Edit({ employee }) {
                                     type="date" 
                                     className={`form-control ${errors.birth_date ? 'is-invalid' : ''}`}
                                     id="birth_date"
-                                    value={data.birth_date}
+                                    value={data.birth_date ? moment(data.birth_date).format('YYYY-MM-DD') : ''}
                                     onChange={e => setData('birth_date', e.target.value)}
                                     required
                                 />
