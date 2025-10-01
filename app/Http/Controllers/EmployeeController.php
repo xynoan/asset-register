@@ -120,11 +120,11 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Remove the specified employee from storage.
+     * Remove the specified employee from storage (soft delete).
      */
     public function destroy(Request $request, Employee $employee)
     {
-        $employee->delete();
+        $employee->delete(); // This will set deleted_at timestamp
 
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
@@ -135,6 +135,25 @@ class EmployeeController extends Controller
 
         return redirect()->route('employees.index')
             ->with('success', 'Employee deleted successfully!');
+    }
+
+    /**
+     * Restore a soft-deleted employee.
+     */
+    public function restore(Request $request, $id)
+    {
+        $employee = Employee::withTrashed()->findOrFail($id);
+        $employee->restore();
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee restored successfully!'
+            ]);
+        }
+
+        return redirect()->route('employees.index')
+            ->with('success', 'Employee restored successfully!');
     }
 
     /**
