@@ -49,7 +49,7 @@ class EmployeeController extends Controller
     /**
      * Store a newly created employee in storage.
      */
-    public function store(StoreEmployeeRequest $request): RedirectResponse
+    public function store(StoreEmployeeRequest $request)
     {
         $validated = $request->validated();
 
@@ -57,7 +57,7 @@ class EmployeeController extends Controller
 
         $fullName = trim($validated['first_name'] . ' ' . $validated['last_name']);
 
-        Employee::create([
+        $employee = Employee::create([
             'employee_no' => $employeeNo,
             'full_name' => $fullName,
             'birth_date' => $validated['birth_date'],
@@ -66,6 +66,14 @@ class EmployeeController extends Controller
             'updated_by' => Auth::id() ?? 1,
         ]);
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employee created successfully!',
+                'data' => $employee->load(['creator', 'updater'])
+            ], 201);
+        }
+
         return redirect()->route('employees.index')
             ->with('success', 'Employee created successfully!');
     }
@@ -73,9 +81,17 @@ class EmployeeController extends Controller
     /**
      * Display the specified employee.
      */
-    public function show(Employee $employee): Response
+    public function show(Request $request, Employee $employee)
     {
         $employee->load(['creator', 'updater']);
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => $employee,
+                'message' => 'Employee retrieved successfully'
+            ]);
+        }
 
         return Inertia::render('Employees/Show', [
             'employee' => $employee,

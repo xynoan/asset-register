@@ -8,4 +8,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::apiResource('employees', EmployeeController::class);
+// Protected API routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('employees', EmployeeController::class);
+    Route::post('employees/{id}/restore', [EmployeeController::class, 'restore'])->name('api.employees.restore');
+});
