@@ -10,4 +10,14 @@ export default defineConfig({
         }),
         react(),
     ],
+    server: {
+        host: '0.0.0.0', // Allow access from network IP
+        cors: {
+            origin: "*", // Allow all origins
+            credentials: true,
+        },
+        hmr: {
+            host: 'localhost',
+        },
+    },
 });
