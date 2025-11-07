@@ -10,13 +10,19 @@ export default function Create({ employees }) {
         vendor_supplier: '',
         warranty_expiry_date: '',
         status: 'Spare',
-        maintenance_history: '',
+        maintenance_history: [],
         assigned_to: '',
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('assets.store'), {
+            transform: (data) => ({
+                ...data,
+                maintenance_history: data.maintenance_history.length > 0 
+                    ? JSON.stringify(data.maintenance_history) 
+                    : ''
+            }),
             onSuccess: () => {
                 window.location.href = route('assets.index');
             },
@@ -24,6 +30,25 @@ export default function Create({ employees }) {
                 console.log('Validation errors:', errors);
             }
         });
+    };
+
+    const addMaintenanceEntry = () => {
+        setData('maintenance_history', [
+            ...data.maintenance_history,
+            { date: '', description: '', cost: '', performed_by: '' }
+        ]);
+    };
+
+    const removeMaintenanceEntry = (index) => {
+        setData('maintenance_history', 
+            data.maintenance_history.filter((_, i) => i !== index)
+        );
+    };
+
+    const updateMaintenanceEntry = (index, field, value) => {
+        const updated = [...data.maintenance_history];
+        updated[index] = { ...updated[index], [field]: value };
+        setData('maintenance_history', updated);
     };
 
     const assetCategories = [
@@ -251,16 +276,87 @@ export default function Create({ employees }) {
                             </div>
 
                             <div className="mb-3">
-                                <label htmlFor="maintenance_history" className="form-label">Maintenance History</label>
-                                <textarea 
-                                    className={`form-control ${errors.maintenance_history ? 'is-invalid' : ''}`}
-                                    id="maintenance_history"
-                                    rows="4"
-                                    value={data.maintenance_history}
-                                    onChange={e => setData('maintenance_history', e.target.value)}
-                                />
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <label htmlFor="maintenance_history" className="form-label mb-0">Maintenance History</label>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={addMaintenanceEntry}
+                                    >
+                                        + Add Entry
+                                    </button>
+                                </div>
+                                {data.maintenance_history.length > 0 ? (
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered table-sm">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th style={{ width: '15%' }}>Date</th>
+                                                    <th style={{ width: '40%' }}>Description</th>
+                                                    <th style={{ width: '15%' }}>Cost</th>
+                                                    <th style={{ width: '20%' }}>Performed By</th>
+                                                    <th style={{ width: '10%' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {data.maintenance_history.map((entry, index) => (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.date || ''}
+                                                                onChange={e => updateMaintenanceEntry(index, 'date', e.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.description || ''}
+                                                                onChange={e => updateMaintenanceEntry(index, 'description', e.target.value)}
+                                                                placeholder="Maintenance description"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.cost || ''}
+                                                                onChange={e => updateMaintenanceEntry(index, 'cost', e.target.value)}
+                                                                placeholder="Cost"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.performed_by || ''}
+                                                                onChange={e => updateMaintenanceEntry(index, 'performed_by', e.target.value)}
+                                                                placeholder="Technician name"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                onClick={() => removeMaintenanceEntry(index)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="text-muted text-center py-3 border rounded">
+                                        No maintenance history entries. Click "Add Entry" to add one.
+                                    </div>
+                                )}
                                 {errors.maintenance_history && (
-                                    <div className="invalid-feedback">
+                                    <div className="invalid-feedback d-block">
                                         {errors.maintenance_history}
                                     </div>
                                 )}
