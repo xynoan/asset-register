@@ -1,0 +1,276 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreAssetRequest;
+use App\Http\Requests\UpdateAssetRequest;
+use App\Models\Asset;
+use App\Models\Employee;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class AssetController extends Controller
+{
+    /**
+     * Display a listing of the assets.
+     */
+    public function index(Request $request)
+    {
+        $assets = Asset::with(['assignedEmployee', 'creator', 'updater'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => $assets,
+                'message' => 'Assets retrieved successfully'
+            ]);
+        }
+
+        return Inertia::render('Assets/Index', [
+            'assets' => $assets,
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new asset.
+     */
+    public function create(): Response
+    {
+        $employees = Employee::where('status', 'active')
+            ->orderBy('full_name')
+            ->get(['id', 'employee_no', 'full_name']);
+
+        return Inertia::render('Assets/Create', [
+            'employees' => $employees,
+        ]);
+    }
+
+    /**
+     * Store a newly created asset in storage.
+     */
+    public function store(StoreAssetRequest $request)
+    {
+        $validated = $request->validated();
+
+        $assetId = $this->generateAssetId();
+
+        $userId = Auth::id() ?? $this->getDefaultUserId();
+
+        // Convert empty string to null for assigned_to
+        $assignedTo = !empty($validated['assigned_to']) ? (int) $validated['assigned_to'] : null;
+
+        $asset = Asset::create([
+            'asset_id' => $assetId,
+            'asset_category' => $validated['asset_category'],
+            'brand_manufacturer' => $validated['brand_manufacturer'],
+            'model_number' => $validated['model_number'],
+            'serial_number' => $validated['serial_number'],
+            'purchase_date' => $validated['purchase_date'],
+            'vendor_supplier' => !empty($validated['vendor_supplier']) ? $validated['vendor_supplier'] : null,
+            'warranty_expiry_date' => !empty($validated['warranty_expiry_date']) ? $validated['warranty_expiry_date'] : null,
+            'status' => $validated['status'],
+            'maintenance_history' => !empty($validated['maintenance_history']) ? $validated['maintenance_history'] : null,
+            'assigned_to' => $assignedTo,
+            'created_by' => $userId,
+            'updated_by' => $userId,
+        ]);
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Asset created successfully!',
+                'data' => $asset->load(['assignedEmployee', 'creator', 'updater'])
+            ], 201);
+        }
+
+        return redirect()->route('assets.index')
+            ->with('success', 'Asset created successfully!');
+    }
+
+    /**
+     * Display the specified asset.
+     */
+    public function show(Request $request, Asset $asset)
+    {
+        $asset->load(['assignedEmployee', 'creator', 'updater']);
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => $asset,
+                'message' => 'Asset retrieved successfully'
+            ]);
+        }
+
+        return Inertia::render('Assets/Show', [
+            'asset' => $asset,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified asset.
+     */
+    public function edit(Asset $asset): Response
+    {
+        $employees = Employee::where('status', 'active')
+            ->orderBy('full_name')
+            ->get(['id', 'employee_no', 'full_name']);
+
+        return Inertia::render('Assets/Edit', [
+            'asset' => $asset,
+            'employees' => $employees,
+        ]);
+    }
+
+    /**
+     * Update the specified asset in storage.
+     */
+    public function update(UpdateAssetRequest $request, Asset $asset)
+    {
+        $validated = $request->validated();
+
+        $userId = Auth::id() ?? $this->getDefaultUserId();
+
+        // Convert empty string to null for assigned_to
+        $assignedTo = !empty($validated['assigned_to']) ? (int) $validated['assigned_to'] : null;
+
+        $asset->update([
+            'asset_category' => $validated['asset_category'],
+            'brand_manufacturer' => $validated['brand_manufacturer'],
+            'model_number' => $validated['model_number'],
+            'serial_number' => $validated['serial_number'],
+            'purchase_date' => $validated['purchase_date'],
+            'vendor_supplier' => !empty($validated['vendor_supplier']) ? $validated['vendor_supplier'] : null,
+            'warranty_expiry_date' => !empty($validated['warranty_expiry_date']) ? $validated['warranty_expiry_date'] : null,
+            'status' => $validated['status'],
+            'maintenance_history' => !empty($validated['maintenance_history']) ? $validated['maintenance_history'] : null,
+            'assigned_to' => $assignedTo,
+            'updated_by' => $userId,
+        ]);
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Asset updated successfully!',
+                'data' => $asset->load(['assignedEmployee', 'creator', 'updater'])
+            ]);
+        }
+
+        return redirect()->route('assets.show', $asset)
+            ->with('success', 'Asset updated successfully!');
+    }
+
+    /**
+     * Remove the specified asset from storage (soft delete).
+     */
+    public function destroy(Request $request, Asset $asset)
+    {
+        $asset->delete(); // This will set deleted_at timestamp
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Asset deleted successfully!'
+            ]);
+        }
+
+        return redirect()->route('assets.index')
+            ->with('success', 'Asset deleted successfully!');
+    }
+
+    /**
+     * Restore a soft-deleted asset.
+     */
+    public function restore(Request $request, $id)
+    {
+        $asset = Asset::withTrashed()->findOrFail($id);
+        $asset->restore();
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Asset restored successfully!'
+            ]);
+        }
+
+        return redirect()->route('assets.index')
+            ->with('success', 'Asset restored successfully!');
+    }
+
+    /**
+     * Generate a unique asset ID in format A#00001, A#00002, etc.
+     */
+    private function generateAssetId(): string
+    {
+        $prefix = 'A#';
+        
+        // Get all assets (including soft-deleted) with the prefix and extract their sequence numbers
+        // We need withTrashed because the unique constraint on asset_id includes deleted records
+        $assets = Asset::withTrashed()
+            ->where('asset_id', 'like', $prefix . '%')
+            ->pluck('asset_id')
+            ->toArray();
+
+        $maxSequence = 0;
+        foreach ($assets as $assetId) {
+            if (preg_match('/A#(\d+)/', $assetId, $matches)) {
+                $sequence = (int) $matches[1];
+                if ($sequence > $maxSequence) {
+                    $maxSequence = $sequence;
+                }
+            }
+        }
+
+        $newSequence = $maxSequence + 1;
+        
+        // Double-check uniqueness in case of race condition
+        $attempts = 0;
+        do {
+            $newAssetId = $prefix . str_pad($newSequence, 5, '0', STR_PAD_LEFT);
+            $exists = Asset::withTrashed()->where('asset_id', $newAssetId)->exists();
+            if ($exists) {
+                $newSequence++;
+                $attempts++;
+            } else {
+                break;
+            }
+            
+            // Safety check to prevent infinite loop
+            if ($attempts > 1000) {
+                throw new \Exception('Unable to generate unique asset ID after 1000 attempts');
+            }
+        } while ($exists);
+
+        return $newAssetId;
+    }
+
+    /**
+     * Get the default user ID, creating a system user if none exists.
+     */
+    private function getDefaultUserId(): int
+    {
+        // Try to get the first user
+        $user = User::first();
+        
+        if ($user) {
+            return $user->id;
+        }
+
+        // If no user exists, create or get a default system user
+        $systemUser = User::firstOrCreate(
+            ['email' => 'system@asset-register.local'],
+            [
+                'name' => 'System',
+                'password' => bcrypt(uniqid()), // Random password since it won't be used
+            ]
+        );
+
+        return $systemUser->id;
+    }
+}

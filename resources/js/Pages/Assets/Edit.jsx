@@ -1,0 +1,302 @@
+import { Head, Link, useForm } from '@inertiajs/react';
+import moment from 'moment';
+
+export default function Edit({ asset, employees }) {
+    const { data, setData, put, processing, errors, reset } = useForm({
+        asset_category: asset.asset_category || '',
+        brand_manufacturer: asset.brand_manufacturer || '',
+        model_number: asset.model_number || '',
+        serial_number: asset.serial_number || '',
+        purchase_date: asset.purchase_date ? moment(asset.purchase_date).format('YYYY-MM-DD') : '',
+        vendor_supplier: asset.vendor_supplier || '',
+        warranty_expiry_date: asset.warranty_expiry_date ? moment(asset.warranty_expiry_date).format('YYYY-MM-DD') : '',
+        status: asset.status || 'Spare',
+        maintenance_history: asset.maintenance_history || '',
+        assigned_to: asset.assigned_to || '',
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        put(route('assets.update', asset.id), {
+            onSuccess: () => {
+                window.location.href = route('assets.show', asset.id);
+            },
+            onError: (errors) => {
+                console.log('Validation errors:', errors);
+            }
+        });
+    };
+
+    const assetCategories = [
+        'Keyboard',
+        'Mouse',
+        'Monitor',
+        'Printer',
+        'Scanner',
+        'Headset',
+        'Webcam',
+        'Speakers',
+        'Hard Drive',
+        'SSD',
+        'USB Drive',
+        'Other'
+    ];
+
+    const statusOptions = ['In-use', 'Spare', 'Under Maintenance', 'Retired'];
+
+    return (
+        <>
+            <Head title={`Edit Asset - ${asset.asset_id}`} />
+            <div className="container mt-5">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h1>Edit Asset</h1>
+                    <div>
+                        <Link 
+                            href={route('assets.show', asset.id)} 
+                            className="btn btn-outline-secondary me-2"
+                        >
+                            View Asset
+                        </Link>
+                        <Link 
+                            href={route('assets.index')} 
+                            className="btn btn-secondary"
+                        >
+                            Back to List
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h5 className="card-title mb-0">Update Asset Information</h5>
+                        <small className="text-muted">Asset ID: {asset.asset_id}</small>
+                    </div>
+                    <div className="card-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <label htmlFor="asset_category" className="form-label">Asset Category *</label>
+                                        <select
+                                            className={`form-select ${errors.asset_category ? 'is-invalid' : ''}`}
+                                            id="asset_category"
+                                            value={data.asset_category}
+                                            onChange={e => setData('asset_category', e.target.value)}
+                                            required
+                                        >
+                                            <option value="">Select Category</option>
+                                            {assetCategories.map(category => (
+                                                <option key={category} value={category}>{category}</option>
+                                            ))}
+                                        </select>
+                                        {errors.asset_category && (
+                                            <div className="invalid-feedback">
+                                                {errors.asset_category}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <label htmlFor="brand_manufacturer" className="form-label">Brand / Manufacturer *</label>
+                                        <input 
+                                            type="text" 
+                                            className={`form-control ${errors.brand_manufacturer ? 'is-invalid' : ''}`}
+                                            id="brand_manufacturer"
+                                            value={data.brand_manufacturer}
+                                            onChange={e => setData('brand_manufacturer', e.target.value)}
+                                            required
+                                        />
+                                        {errors.brand_manufacturer && (
+                                            <div className="invalid-feedback">
+                                                {errors.brand_manufacturer}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <label htmlFor="model_number" className="form-label">Model Number *</label>
+                                        <input 
+                                            type="text" 
+                                            className={`form-control ${errors.model_number ? 'is-invalid' : ''}`}
+                                            id="model_number"
+                                            value={data.model_number}
+                                            onChange={e => setData('model_number', e.target.value)}
+                                            required
+                                        />
+                                        {errors.model_number && (
+                                            <div className="invalid-feedback">
+                                                {errors.model_number}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <label htmlFor="serial_number" className="form-label">Serial Number *</label>
+                                        <input 
+                                            type="text" 
+                                            className={`form-control ${errors.serial_number ? 'is-invalid' : ''}`}
+                                            id="serial_number"
+                                            value={data.serial_number}
+                                            onChange={e => setData('serial_number', e.target.value)}
+                                            required
+                                        />
+                                        {errors.serial_number && (
+                                            <div className="invalid-feedback">
+                                                {errors.serial_number}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <label htmlFor="purchase_date" className="form-label">Purchase Date *</label>
+                                        <input 
+                                            type="date" 
+                                            className={`form-control ${errors.purchase_date ? 'is-invalid' : ''}`}
+                                            id="purchase_date"
+                                            value={data.purchase_date}
+                                            onChange={e => setData('purchase_date', e.target.value)}
+                                            required
+                                        />
+                                        {errors.purchase_date && (
+                                            <div className="invalid-feedback">
+                                                {errors.purchase_date}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <label htmlFor="vendor_supplier" className="form-label">Vendor / Supplier</label>
+                                        <input 
+                                            type="text" 
+                                            className={`form-control ${errors.vendor_supplier ? 'is-invalid' : ''}`}
+                                            id="vendor_supplier"
+                                            value={data.vendor_supplier}
+                                            onChange={e => setData('vendor_supplier', e.target.value)}
+                                        />
+                                        {errors.vendor_supplier && (
+                                            <div className="invalid-feedback">
+                                                {errors.vendor_supplier}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <label htmlFor="warranty_expiry_date" className="form-label">Warranty Expiry Date</label>
+                                        <input 
+                                            type="date" 
+                                            className={`form-control ${errors.warranty_expiry_date ? 'is-invalid' : ''}`}
+                                            id="warranty_expiry_date"
+                                            value={data.warranty_expiry_date}
+                                            onChange={e => setData('warranty_expiry_date', e.target.value)}
+                                        />
+                                        {errors.warranty_expiry_date && (
+                                            <div className="invalid-feedback">
+                                                {errors.warranty_expiry_date}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <label htmlFor="status" className="form-label">Status *</label>
+                                        <select
+                                            className={`form-select ${errors.status ? 'is-invalid' : ''}`}
+                                            id="status"
+                                            value={data.status}
+                                            onChange={e => setData('status', e.target.value)}
+                                            required
+                                        >
+                                            {statusOptions.map(status => (
+                                                <option key={status} value={status}>{status}</option>
+                                            ))}
+                                        </select>
+                                        {errors.status && (
+                                            <div className="invalid-feedback">
+                                                {errors.status}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <label htmlFor="assigned_to" className="form-label">Assigned To</label>
+                                        <select
+                                            className={`form-select ${errors.assigned_to ? 'is-invalid' : ''}`}
+                                            id="assigned_to"
+                                            value={data.assigned_to}
+                                            onChange={e => setData('assigned_to', e.target.value)}
+                                        >
+                                            <option value="">Unassigned</option>
+                                            {employees.map(employee => (
+                                                <option key={employee.id} value={employee.id}>
+                                                    {employee.full_name} ({employee.employee_no})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {errors.assigned_to && (
+                                            <div className="invalid-feedback">
+                                                {errors.assigned_to}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="maintenance_history" className="form-label">Maintenance History</label>
+                                <textarea 
+                                    className={`form-control ${errors.maintenance_history ? 'is-invalid' : ''}`}
+                                    id="maintenance_history"
+                                    rows="4"
+                                    value={data.maintenance_history}
+                                    onChange={e => setData('maintenance_history', e.target.value)}
+                                />
+                                {errors.maintenance_history && (
+                                    <div className="invalid-feedback">
+                                        {errors.maintenance_history}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="d-flex justify-content-between">
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-primary"
+                                    disabled={processing}
+                                >
+                                    {processing ? 'Updating...' : 'Update Asset'}
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-outline-secondary"
+                                    onClick={() => reset()}
+                                >
+                                    Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
+

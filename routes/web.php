@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssetController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -14,6 +15,9 @@ Route::get('/dashboard', function () {
 
 Route::resource('employees', EmployeeController::class);
 Route::post('employees/{id}/restore', [EmployeeController::class, 'restore'])->name('employees.restore');
+
+Route::resource('assets', AssetController::class);
+Route::post('assets/{id}/restore', [AssetController::class, 'restore'])->name('assets.restore');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
