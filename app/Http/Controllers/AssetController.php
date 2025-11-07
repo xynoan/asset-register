@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -65,6 +66,15 @@ class AssetController extends Controller
         // Convert empty string to null for assigned_to
         $assignedTo = !empty($validated['assigned_to']) ? (int) $validated['assigned_to'] : null;
 
+        // Handle document uploads
+        $documentPaths = [];
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $file) {
+                $path = $file->store('assets/documents', 'public');
+                $documentPaths[] = $path;
+            }
+        }
+
         $asset = Asset::create([
             'asset_id' => $assetId,
             'asset_category' => $validated['asset_category'],
@@ -77,6 +87,7 @@ class AssetController extends Controller
             'status' => $validated['status'],
             'maintenance_history' => !empty($validated['maintenance_history']) ? $validated['maintenance_history'] : null,
             'comments_history' => !empty($validated['comments_history']) ? $validated['comments_history'] : null,
+            'document_paths' => !empty($documentPaths) ? $documentPaths : null,
             'assigned_to' => $assignedTo,
             'created_by' => $userId,
             'updated_by' => $userId,
@@ -141,7 +152,16 @@ class AssetController extends Controller
         // Convert empty string to null for assigned_to
         $assignedTo = !empty($validated['assigned_to']) ? (int) $validated['assigned_to'] : null;
 
-        $asset->update([
+        // Handle document uploads - merge with existing documents
+        $documentPaths = $asset->document_paths ?? [];
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $file) {
+                $path = $file->store('assets/documents', 'public');
+                $documentPaths[] = $path;
+            }
+        }
+
+        $updateData = [
             'asset_category' => $validated['asset_category'],
             'brand_manufacturer' => $validated['brand_manufacturer'],
             'model_number' => $validated['model_number'],
@@ -152,9 +172,12 @@ class AssetController extends Controller
             'status' => $validated['status'],
             'maintenance_history' => !empty($validated['maintenance_history']) ? $validated['maintenance_history'] : null,
             'comments_history' => !empty($validated['comments_history']) ? $validated['comments_history'] : null,
+            'document_paths' => !empty($documentPaths) ? $documentPaths : null,
             'assigned_to' => $assignedTo,
             'updated_by' => $userId,
-        ]);
+        ];
+
+        $asset->update($updateData);
 
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([

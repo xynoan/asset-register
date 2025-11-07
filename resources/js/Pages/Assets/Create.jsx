@@ -12,6 +12,7 @@ export default function Create({ employees }) {
         status: 'Spare',
         maintenance_history: [],
         comments_history: [],
+        documents: [],
         assigned_to: '',
     });
 
@@ -72,6 +73,18 @@ export default function Create({ employees }) {
         const updated = [...data.comments_history];
         updated[index] = { ...updated[index], [field]: value };
         setData('comments_history', updated);
+    };
+
+    const handleDocumentChange = (e) => {
+        const files = Array.from(e.target.files);
+        setData('documents', [...data.documents, ...files]);
+        // Clear the input so users can add more files
+        e.target.value = '';
+    };
+
+    const removeDocument = (index) => {
+        const updated = data.documents.filter((_, i) => i !== index);
+        setData('documents', updated);
     };
 
     const assetCategories = [
@@ -458,6 +471,47 @@ export default function Create({ employees }) {
                                 {errors.comments_history && (
                                     <div className="invalid-feedback d-block">
                                         {errors.comments_history}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="documents" className="form-label">Documents</label>
+                                <input
+                                    type="file"
+                                    className={`form-control ${errors.documents ? 'is-invalid' : ''}`}
+                                    id="documents"
+                                    multiple
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                                    onChange={handleDocumentChange}
+                                />
+                                <small className="form-text text-muted">
+                                    Upload invoices, warranties, manuals, or other related documents (PDF, DOC, DOCX, JPG, PNG, TXT)
+                                </small>
+                                {data.documents.length > 0 && (
+                                    <div className="mt-3">
+                                        <h6 className="mb-2">Selected Documents:</h6>
+                                        <ul className="list-group">
+                                            {data.documents.map((file, index) => (
+                                                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span>
+                                                        📄 {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        onClick={() => removeDocument(index)}
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {errors.documents && (
+                                    <div className="invalid-feedback d-block">
+                                        {errors.documents}
                                     </div>
                                 )}
                             </div>

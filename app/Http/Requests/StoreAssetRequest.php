@@ -32,6 +32,8 @@ class StoreAssetRequest extends FormRequest
             'status' => ['required', 'in:In-use,Spare,Under Maintenance,Retired'],
             'maintenance_history' => ['nullable', 'string'],
             'comments_history' => ['nullable', 'string'],
+            'documents' => ['nullable', 'array'],
+            'documents.*' => ['file', 'max:10240', 'mimes:pdf,doc,docx,jpg,jpeg,png,txt'],
             'assigned_to' => ['nullable', 'sometimes', 'exists:tbl_employees,id'],
         ];
     }
