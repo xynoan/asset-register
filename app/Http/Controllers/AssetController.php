@@ -76,6 +76,7 @@ class AssetController extends Controller
             'warranty_expiry_date' => !empty($validated['warranty_expiry_date']) ? $validated['warranty_expiry_date'] : null,
             'status' => $validated['status'],
             'maintenance_history' => !empty($validated['maintenance_history']) ? $validated['maintenance_history'] : null,
+            'comments_history' => !empty($validated['comments_history']) ? $validated['comments_history'] : null,
             'assigned_to' => $assignedTo,
             'created_by' => $userId,
             'updated_by' => $userId,
@@ -150,6 +151,7 @@ class AssetController extends Controller
             'warranty_expiry_date' => !empty($validated['warranty_expiry_date']) ? $validated['warranty_expiry_date'] : null,
             'status' => $validated['status'],
             'maintenance_history' => !empty($validated['maintenance_history']) ? $validated['maintenance_history'] : null,
+            'comments_history' => !empty($validated['comments_history']) ? $validated['comments_history'] : null,
             'assigned_to' => $assignedTo,
             'updated_by' => $userId,
         ]);

@@ -31,6 +31,7 @@ class UpdateAssetRequest extends FormRequest
             'warranty_expiry_date' => ['nullable', 'date', 'after:purchase_date'],
             'status' => ['required', 'in:In-use,Spare,Under Maintenance,Retired'],
             'maintenance_history' => ['nullable', 'string'],
+            'comments_history' => ['nullable', 'string'],
             'assigned_to' => ['nullable', 'sometimes', 'exists:tbl_employees,id'],
         ];
     }
