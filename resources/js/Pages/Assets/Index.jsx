@@ -30,7 +30,7 @@ export default function Index({ assets, flash }) {
                         <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 )}
-                
+
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Assets</h1>
                     <Link href={route('assets.create')} className="btn btn-primary">
@@ -72,30 +72,29 @@ export default function Index({ assets, flash }) {
                                             </span>
                                         </td>
                                         <td>
-                                            {(() => {
-                                                const employee = asset.assignedEmployee || asset.assigned_employee;
-                                                return employee ? (
-                                                    <span>{employee.employee_no}</span>
+                                            {
+                                                asset.assigned_employee ? (
+                                                    <span>{asset.assigned_employee.employee_no}</span>
                                                 ) : (
                                                     <span className="text-muted">Unassigned</span>
-                                                );
-                                            })()}
+                                                )
+                                            }
                                         </td>
                                         <td>{moment(asset.purchase_date).format('DD/MM/YYYY')}</td>
                                         <td>
-                                            <Link 
-                                                href={route('assets.show', asset.id)} 
+                                            <Link
+                                                href={route('assets.show', asset.id)}
                                                 className="btn btn-sm btn-outline-primary me-2"
                                             >
                                                 View
                                             </Link>
-                                            <Link 
-                                                href={route('assets.edit', asset.id)} 
+                                            <Link
+                                                href={route('assets.edit', asset.id)}
                                                 className="btn btn-sm btn-outline-secondary me-2"
                                             >
                                                 Edit
                                             </Link>
-                                            <button 
+                                            <button
                                                 onClick={() => handleDelete(asset.id, asset.asset_id)}
                                                 className="btn btn-sm btn-outline-danger"
                                                 disabled={processing}

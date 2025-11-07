@@ -19,14 +19,14 @@ export default function Show({ asset }) {
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Asset Details</h1>
                     <div>
-                        <Link 
-                            href={route('assets.edit', asset.id)} 
+                        <Link
+                            href={route('assets.edit', asset.id)}
                             className="btn btn-outline-primary me-2"
                         >
                             Edit Asset
                         </Link>
-                        <Link 
-                            href={route('assets.index')} 
+                        <Link
+                            href={route('assets.index')}
                             className="btn btn-secondary"
                         >
                             Back to List
@@ -116,14 +116,13 @@ export default function Show({ asset }) {
                                 <div className="mb-3">
                                     <label className="form-label fw-bold">Assigned To:</label>
                                     <p className="form-control-plaintext">
-                                        {(() => {
-                                            const employee = asset.assignedEmployee || asset.assigned_employee;
-                                            return employee ? (
-                                                <span>{employee.employee_no}</span>
+                                        {
+                                            asset.assigned_employee ? (
+                                                <span>{asset.assigned_employee.employee_no}</span>
                                             ) : (
                                                 <span className="text-muted">Unassigned</span>
-                                            );
-                                        })()}
+                                            )
+                                        }
                                     </p>
                                 </div>
                             </div>
