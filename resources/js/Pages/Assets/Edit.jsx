@@ -29,7 +29,7 @@ export default function Edit({ asset, employees }) {
     const initialMaintenanceHistory = parseMaintenanceHistory();
     const initialCommentsHistory = parseCommentsHistory();
 
-    const { data, setData, put, processing, errors, reset } = useForm({
+    const { data, setData, put, post, processing, errors, reset } = useForm({
         asset_category: asset.asset_category || '',
         brand_manufacturer: asset.brand_manufacturer || '',
         model_number: asset.model_number || '',
@@ -46,14 +46,27 @@ export default function Edit({ asset, employees }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(route('assets.update', asset.id), {
-            onSuccess: () => {
-                window.location.href = route('assets.show', asset.id);
-            },
-            onError: (errors) => {
-                console.log('Validation errors:', errors);
-            }
-        });
+        // When files are present, use POST route to avoid method spoofing issues
+        // When no files, use PUT for cleaner semantics
+        if (data.documents.length > 0) {
+            post(route('assets.update.post', asset.id), {
+                onSuccess: () => {
+                    window.location.href = route('assets.show', asset.id);
+                },
+                onError: (errors) => {
+                    console.log('Validation errors:', errors);
+                }
+            });
+        } else {
+            put(route('assets.update', asset.id), {
+                onSuccess: () => {
+                    window.location.href = route('assets.show', asset.id);
+                },
+                onError: (errors) => {
+                    console.log('Validation errors:', errors);
+                }
+            });
+        }
     };
 
     const addMaintenanceEntry = () => {

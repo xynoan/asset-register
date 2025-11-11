@@ -17,6 +17,8 @@ Route::resource('employees', EmployeeController::class);
 Route::post('employees/{id}/restore', [EmployeeController::class, 'restore'])->name('employees.restore');
 
 Route::resource('assets', AssetController::class);
+// Allow POST with method spoofing for file uploads in updates
+Route::post('assets/{asset}', [AssetController::class, 'update'])->name('assets.update.post');
 Route::post('assets/{id}/restore', [AssetController::class, 'restore'])->name('assets.restore');
 
 Route::middleware('auth')->group(function () {
