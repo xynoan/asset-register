@@ -2,6 +2,33 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import moment from 'moment';
 
 export default function Edit({ asset, employees }) {
+    // Parse maintenance_history - handle both string (JSON) and array formats
+    const parseMaintenanceHistory = () => {
+        if (!asset.maintenance_history) return [];
+        if (Array.isArray(asset.maintenance_history)) return asset.maintenance_history;
+        try {
+            const parsed = JSON.parse(asset.maintenance_history);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
+    // Parse comments_history - should already be an array due to model cast, but handle string just in case
+    const parseCommentsHistory = () => {
+        if (!asset.comments_history) return [];
+        if (Array.isArray(asset.comments_history)) return asset.comments_history;
+        try {
+            const parsed = JSON.parse(asset.comments_history);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
+    const initialMaintenanceHistory = parseMaintenanceHistory();
+    const initialCommentsHistory = parseCommentsHistory();
+
     const { data, setData, put, processing, errors, reset } = useForm({
         asset_category: asset.asset_category || '',
         brand_manufacturer: asset.brand_manufacturer || '',
@@ -11,7 +38,9 @@ export default function Edit({ asset, employees }) {
         vendor_supplier: asset.vendor_supplier || '',
         warranty_expiry_date: asset.warranty_expiry_date ? moment(asset.warranty_expiry_date).format('YYYY-MM-DD') : '',
         status: asset.status || 'Spare',
-        maintenance_history: asset.maintenance_history || '',
+        maintenance_history: initialMaintenanceHistory,
+        comments_history: initialCommentsHistory,
+        documents: [],
         assigned_to: asset.assigned_to || '',
     });
 
@@ -25,6 +54,56 @@ export default function Edit({ asset, employees }) {
                 console.log('Validation errors:', errors);
             }
         });
+    };
+
+    const addMaintenanceEntry = () => {
+        setData('maintenance_history', [
+            ...data.maintenance_history,
+            { date: '', description: '', cost: '', performed_by: '' }
+        ]);
+    };
+
+    const removeMaintenanceEntry = (index) => {
+        setData('maintenance_history', 
+            data.maintenance_history.filter((_, i) => i !== index)
+        );
+    };
+
+    const updateMaintenanceEntry = (index, field, value) => {
+        const updated = [...data.maintenance_history];
+        updated[index] = { ...updated[index], [field]: value };
+        setData('maintenance_history', updated);
+    };
+
+    const addCommentEntry = () => {
+        setData('comments_history', [
+            ...data.comments_history,
+            { date: '', comment: '', added_by: '' }
+        ]);
+    };
+
+    const removeCommentEntry = (index) => {
+        setData('comments_history', 
+            data.comments_history.filter((_, i) => i !== index)
+        );
+    };
+
+    const updateCommentEntry = (index, field, value) => {
+        const updated = [...data.comments_history];
+        updated[index] = { ...updated[index], [field]: value };
+        setData('comments_history', updated);
+    };
+
+    const handleDocumentChange = (e) => {
+        const files = Array.from(e.target.files);
+        setData('documents', [...data.documents, ...files]);
+        // Clear the input so users can add more files
+        e.target.value = '';
+    };
+
+    const removeDocument = (index) => {
+        const updated = data.documents.filter((_, i) => i !== index);
+        setData('documents', updated);
     };
 
     const assetCategories = [
@@ -261,21 +340,222 @@ export default function Edit({ asset, employees }) {
                             </div>
 
                             <div className="mb-3">
-                                <label htmlFor="maintenance_history" className="form-label">Maintenance History</label>
-                                <textarea 
-                                    className={`form-control ${errors.maintenance_history ? 'is-invalid' : ''}`}
-                                    id="maintenance_history"
-                                    rows="4"
-                                    value={data.maintenance_history}
-                                    onChange={e => setData('maintenance_history', e.target.value)}
-                                />
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <label htmlFor="maintenance_history" className="form-label mb-0">Maintenance History</label>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={addMaintenanceEntry}
+                                    >
+                                        + Add Entry
+                                    </button>
+                                </div>
+                                {data.maintenance_history.length > 0 ? (
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered table-sm">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th style={{ width: '15%' }}>Date</th>
+                                                    <th style={{ width: '40%' }}>Description</th>
+                                                    <th style={{ width: '15%' }}>Cost</th>
+                                                    <th style={{ width: '20%' }}>Performed By</th>
+                                                    <th style={{ width: '10%' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {data.maintenance_history.map((entry, index) => (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.date || ''}
+                                                                onChange={e => updateMaintenanceEntry(index, 'date', e.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.description || ''}
+                                                                onChange={e => updateMaintenanceEntry(index, 'description', e.target.value)}
+                                                                placeholder="Maintenance description"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.cost || ''}
+                                                                onChange={e => updateMaintenanceEntry(index, 'cost', e.target.value)}
+                                                                placeholder="Cost"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.performed_by || ''}
+                                                                onChange={e => updateMaintenanceEntry(index, 'performed_by', e.target.value)}
+                                                                placeholder="Technician name"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                onClick={() => removeMaintenanceEntry(index)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="text-muted text-center py-3 border rounded">
+                                        No maintenance history entries. Click "Add Entry" to add one.
+                                    </div>
+                                )}
                                 {errors.maintenance_history && (
-                                    <div className="invalid-feedback">
+                                    <div className="invalid-feedback d-block">
                                         {errors.maintenance_history}
                                     </div>
                                 )}
                             </div>
 
+                            <div className="mb-3">
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <label htmlFor="comments_history" className="form-label mb-0">Comments / History</label>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={addCommentEntry}
+                                    >
+                                        + Add Entry
+                                    </button>
+                                </div>
+                                {data.comments_history.length > 0 ? (
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered table-sm">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th style={{ width: '15%' }}>Date</th>
+                                                    <th style={{ width: '55%' }}>Comment</th>
+                                                    <th style={{ width: '20%' }}>Added By</th>
+                                                    <th style={{ width: '10%' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {data.comments_history.map((entry, index) => (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.date || ''}
+                                                                onChange={e => updateCommentEntry(index, 'date', e.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.comment || ''}
+                                                                onChange={e => updateCommentEntry(index, 'comment', e.target.value)}
+                                                                placeholder="Enter comment or note"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={entry.added_by || ''}
+                                                                onChange={e => updateCommentEntry(index, 'added_by', e.target.value)}
+                                                                placeholder="Name"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                onClick={() => removeCommentEntry(index)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="text-muted text-center py-3 border rounded">
+                                        No comment entries. Click "Add Entry" to add one.
+                                    </div>
+                                )}
+                                {errors.comments_history && (
+                                    <div className="invalid-feedback d-block">
+                                        {errors.comments_history}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="documents" className="form-label">Documents</label>
+                                <input
+                                    type="file"
+                                    className={`form-control ${errors.documents ? 'is-invalid' : ''}`}
+                                    id="documents"
+                                    multiple
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                                    onChange={handleDocumentChange}
+                                />
+                                <small className="form-text text-muted">
+                                    Upload invoices, warranties, manuals, or other related documents (PDF, DOC, DOCX, JPG, PNG, TXT). New documents will be added to existing ones.
+                                </small>
+                                {asset.document_paths && asset.document_paths.length > 0 && (
+                                    <div className="mt-3">
+                                        <h6 className="mb-2">Existing Documents:</h6>
+                                        <ul className="list-group">
+                                            {asset.document_paths.map((path, index) => (
+                                                <li key={index} className="list-group-item">
+                                                    <span>📄 {path.split('/').pop()}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {data.documents.length > 0 && (
+                                    <div className="mt-3">
+                                        <h6 className="mb-2">New Documents to Upload:</h6>
+                                        <ul className="list-group">
+                                            {data.documents.map((file, index) => (
+                                                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span>
+                                                        📄 {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        onClick={() => removeDocument(index)}
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {errors.documents && (
+                                    <div className="invalid-feedback d-block">
+                                        {errors.documents}
+                                    </div>
+                                )}
+                            </div>
+                            
                             <div className="d-flex justify-content-between">
                                 <button 
                                     type="submit" 
