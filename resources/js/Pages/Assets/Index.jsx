@@ -55,6 +55,7 @@ export default function Index({ assets, flash }) {
                                     <th>Status</th>
                                     <th>Assigned To</th>
                                     <th>Purchase Date</th>
+                                    <th>Attachments</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -81,6 +82,19 @@ export default function Index({ assets, flash }) {
                                             }
                                         </td>
                                         <td>{moment(asset.purchase_date).format('DD/MM/YYYY')}</td>
+                                        <td>
+                                            {asset.document_count > 0 ? (
+                                                <Link
+                                                    href={route('assets.show', asset.id)}
+                                                    className="badge bg-info text-decoration-none"
+                                                    title="Click to view attachments"
+                                                >
+                                                    📎 {asset.document_count}
+                                                </Link>
+                                            ) : (
+                                                <span className="text-muted">—</span>
+                                            )}
+                                        </td>
                                         <td>
                                             <Link
                                                 href={route('assets.show', asset.id)}

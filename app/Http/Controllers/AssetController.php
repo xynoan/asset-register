@@ -25,6 +25,16 @@ class AssetController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        // Add document count to each asset
+        $assets->getCollection()->transform(function ($asset) {
+            $documentCount = 0;
+            if ($asset->document_paths && is_array($asset->document_paths)) {
+                $documentCount = count($asset->document_paths);
+            }
+            $asset->document_count = $documentCount;
+            return $asset;
+        });
+
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
                 'success' => true,
