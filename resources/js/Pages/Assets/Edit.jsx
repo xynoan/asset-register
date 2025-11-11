@@ -548,7 +548,7 @@ export default function Edit({ asset, employees }) {
                                                 const fileName = doc.original_name || (typeof doc === 'string' ? doc.split('/').pop() : 'Unknown');
                                                 return (
                                                     <li key={index} className="list-group-item">
-                                                        <span>�� {fileName}</span>
+                                                        <span>{fileName}</span>
                                                     </li>
                                                 );
                                             })}
