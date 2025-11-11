@@ -39,13 +39,23 @@ export default function Show({ asset }) {
     // Parse document_paths - handle both string (JSON) and array formats
     const parseDocumentPaths = () => {
         if (!asset.document_paths) return [];
-        if (Array.isArray(asset.document_paths)) return asset.document_paths;
-        try {
-            const parsed = JSON.parse(asset.document_paths);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            return [];
+        if (Array.isArray(asset.document_paths)) {
+            return asset.document_paths.map(doc => {
+                // Handle new format: {path: "...", original_name: "..."}
+                if (typeof doc === 'object' && doc !== null && doc.original_name) {
+                    return doc;
+                }
+                // Handle old format: just a string path
+                if (typeof doc === 'string') {
+                    return {
+                        path: doc,
+                        original_name: doc.split('/').pop() || 'Unknown'
+                    };
+                }
+                return { path: '', original_name: 'Unknown' };
+            });
         }
+        return [];
     };
 
     const maintenanceHistory = parseMaintenanceHistory();
@@ -268,9 +278,10 @@ export default function Show({ asset }) {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {documentPaths.map((path, index) => {
-                                                        const fileName = getFileName(path);
-                                                        const fileUrl = documentUrls[index] || `/storage/${path}`;
+                                                    {documentPaths.map((doc, index) => {
+                                                        const fileName = doc.original_name || (typeof doc === 'string' ? doc.split('/').pop() : 'Unknown');
+                                                        const filePath = typeof doc === 'object' && doc.path ? doc.path : doc;
+                                                        const fileUrl = documentUrls[index] || `/storage/${filePath}`;
                                                         return (
                                                             <tr key={index}>
                                                                 <td className="text-center">{getFileIcon(fileName)}</td>

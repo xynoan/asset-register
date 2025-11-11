@@ -123,6 +123,30 @@ export default function Edit({ asset, employees }) {
 
     const statusOptions = ['In-use', 'Spare', 'Under Maintenance', 'Retired'];
 
+    // Add a function to parse document paths (similar to Show.jsx)
+    const parseDocumentPaths = () => {
+        if (!asset.document_paths) return [];
+        if (Array.isArray(asset.document_paths)) {
+            return asset.document_paths.map(doc => {
+                // Handle new format: {path: "...", original_name: "..."}
+                if (typeof doc === 'object' && doc !== null && doc.original_name) {
+                    return doc;
+                }
+                // Handle old format: just a string path
+                if (typeof doc === 'string') {
+                    return {
+                        path: doc,
+                        original_name: doc.split('/').pop() || 'Unknown'
+                    };
+                }
+                return { path: '', original_name: 'Unknown' };
+            });
+        }
+        return [];
+    };
+
+    const existingDocuments = parseDocumentPaths();
+
     return (
         <>
             <Head title={`Edit Asset - ${asset.asset_id}`} />
@@ -516,15 +540,18 @@ export default function Edit({ asset, employees }) {
                                 <small className="form-text text-muted">
                                     Upload invoices, warranties, manuals, or other related documents (PDF, DOC, DOCX, JPG, PNG, TXT). New documents will be added to existing ones.
                                 </small>
-                                {asset.document_paths && asset.document_paths.length > 0 && (
+                                {existingDocuments.length > 0 && (
                                     <div className="mt-3">
                                         <h6 className="mb-2">Existing Documents:</h6>
                                         <ul className="list-group">
-                                            {asset.document_paths.map((path, index) => (
-                                                <li key={index} className="list-group-item">
-                                                    <span>📄 {path.split('/').pop()}</span>
-                                                </li>
-                                            ))}
+                                            {existingDocuments.map((doc, index) => {
+                                                const fileName = doc.original_name || (typeof doc === 'string' ? doc.split('/').pop() : 'Unknown');
+                                                return (
+                                                    <li key={index} className="list-group-item">
+                                                        <span>�� {fileName}</span>
+                                                    </li>
+                                                );
+                                            })}
                                         </ul>
                                     </div>
                                 )}

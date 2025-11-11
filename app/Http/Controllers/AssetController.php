@@ -66,12 +66,15 @@ class AssetController extends Controller
         // Convert empty string to null for assigned_to
         $assignedTo = !empty($validated['assigned_to']) ? (int) $validated['assigned_to'] : null;
 
-        // Handle document uploads
+        // Handle document uploads - store both path and original filename
         $documentPaths = [];
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $file) {
                 $path = $file->store('assets/documents', 'public');
-                $documentPaths[] = $path;
+                $documentPaths[] = [
+                    'path' => $path,
+                    'original_name' => $file->getClientOriginalName()
+                ];
             }
         }
 
@@ -113,11 +116,27 @@ class AssetController extends Controller
         $asset->load(['assignedEmployee', 'creator', 'updater']);
 
         // Convert document paths to URLs for frontend access
+        // Also normalize document structure for backward compatibility
         if ($asset->document_paths && is_array($asset->document_paths)) {
-            $asset->document_urls = array_map(function ($path) {
-                return Storage::url($path);
+            $normalizedDocuments = array_map(function($doc) {
+                // Handle backward compatibility: if it's a string (old format), convert to new format
+                if (is_string($doc)) {
+                    return [
+                        'path' => $doc,
+                        'original_name' => basename($doc) // Fallback to filename from path
+                    ];
+                }
+                // Already in new format
+                return $doc;
             }, $asset->document_paths);
+            
+            $asset->document_paths = $normalizedDocuments;
+            $asset->document_urls = array_map(function ($doc) {
+                $path = is_array($doc) ? $doc['path'] : $doc;
+                return Storage::url($path);
+            }, $normalizedDocuments);
         } else {
+            $asset->document_paths = [];
             $asset->document_urls = [];
         }
 
@@ -162,11 +181,29 @@ class AssetController extends Controller
         $assignedTo = !empty($validated['assigned_to']) ? (int) $validated['assigned_to'] : null;
 
         // Handle document uploads - merge with existing documents
+        // Normalize existing documents to ensure they have the new structure
         $documentPaths = $asset->document_paths ?? [];
+        if (!empty($documentPaths)) {
+            $documentPaths = array_map(function($doc) {
+                // Handle backward compatibility: if it's a string (old format), convert to new format
+                if (is_string($doc)) {
+                    return [
+                        'path' => $doc,
+                        'original_name' => basename($doc) // Fallback to filename from path
+                    ];
+                }
+                // Already in new format
+                return $doc;
+            }, $documentPaths);
+        }
+        
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $file) {
                 $path = $file->store('assets/documents', 'public');
-                $documentPaths[] = $path;
+                $documentPaths[] = [
+                    'path' => $path,
+                    'original_name' => $file->getClientOriginalName()
+                ];
             }
         }
 
