@@ -112,6 +112,15 @@ class AssetController extends Controller
     {
         $asset->load(['assignedEmployee', 'creator', 'updater']);
 
+        // Convert document paths to URLs for frontend access
+        if ($asset->document_paths && is_array($asset->document_paths)) {
+            $asset->document_urls = array_map(function ($path) {
+                return Storage::url($path);
+            }, $asset->document_paths);
+        } else {
+            $asset->document_urls = [];
+        }
+
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
                 'success' => true,

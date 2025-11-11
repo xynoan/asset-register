@@ -36,8 +36,44 @@ export default function Show({ asset }) {
         }
     };
 
+    // Parse document_paths - handle both string (JSON) and array formats
+    const parseDocumentPaths = () => {
+        if (!asset.document_paths) return [];
+        if (Array.isArray(asset.document_paths)) return asset.document_paths;
+        try {
+            const parsed = JSON.parse(asset.document_paths);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
     const maintenanceHistory = parseMaintenanceHistory();
     const commentsHistory = parseCommentsHistory();
+    const documentPaths = parseDocumentPaths();
+    const documentUrls = asset.document_urls || [];
+
+    // Helper function to get file name from path
+    const getFileName = (path) => {
+        if (!path) return 'Unknown';
+        const parts = path.split('/');
+        return parts[parts.length - 1];
+    };
+
+    // Helper function to get file icon based on extension
+    const getFileIcon = (fileName) => {
+        const ext = fileName.split('.').pop()?.toLowerCase();
+        const iconMap = {
+            'pdf': '📄',
+            'doc': '📝',
+            'docx': '📝',
+            'jpg': '🖼️',
+            'jpeg': '🖼️',
+            'png': '🖼️',
+            'txt': '📃',
+        };
+        return iconMap[ext] || '📎';
+    };
 
     return (
         <>
@@ -209,6 +245,49 @@ export default function Show({ asset }) {
                                                             <td>{entry.added_by || 'N/A'}</td>
                                                         </tr>
                                                     ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {documentPaths.length > 0 && (
+                            <div className="row">
+                                <div className="col-12">
+                                    <div className="mb-3">
+                                        <label className="form-label fw-bold">Documents:</label>
+                                        <div className="table-responsive">
+                                            <table className="table table-bordered table-sm">
+                                                <thead className="table-light">
+                                                    <tr>
+                                                        <th style={{ width: '10%' }}>Icon</th>
+                                                        <th style={{ width: '60%' }}>File Name</th>
+                                                        <th style={{ width: '30%' }}>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {documentPaths.map((path, index) => {
+                                                        const fileName = getFileName(path);
+                                                        const fileUrl = documentUrls[index] || `/storage/${path}`;
+                                                        return (
+                                                            <tr key={index}>
+                                                                <td className="text-center">{getFileIcon(fileName)}</td>
+                                                                <td>{fileName}</td>
+                                                                <td>
+                                                                    <a
+                                                                        href={fileUrl}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="btn btn-sm btn-outline-primary"
+                                                                    >
+                                                                        View / Download
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                                 </tbody>
                                             </table>
                                         </div>
