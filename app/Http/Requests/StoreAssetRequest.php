@@ -47,6 +47,44 @@ class StoreAssetRequest extends FormRequest
         if ($this->has('assigned_to') && $this->assigned_to === '') {
             $this->merge(['assigned_to' => null]);
         }
+
+        // Handle maintenance_history: convert array to JSON string or null
+        if ($this->has('maintenance_history')) {
+            $maintenanceHistory = $this->maintenance_history;
+            if (is_array($maintenanceHistory)) {
+                // Filter out empty entries (where all fields are empty)
+                $filtered = array_filter($maintenanceHistory, function($entry) {
+                    return !empty(array_filter($entry));
+                });
+                
+                $this->merge([
+                    'maintenance_history' => !empty($filtered) 
+                        ? json_encode(array_values($filtered)) 
+                        : null
+                ]);
+            } elseif ($maintenanceHistory === '') {
+                $this->merge(['maintenance_history' => null]);
+            }
+        }
+
+        // Handle comments_history: convert array to JSON string or null
+        if ($this->has('comments_history')) {
+            $commentsHistory = $this->comments_history;
+            if (is_array($commentsHistory)) {
+                // Filter out empty entries (where all fields are empty)
+                $filtered = array_filter($commentsHistory, function($entry) {
+                    return !empty(array_filter($entry));
+                });
+                
+                $this->merge([
+                    'comments_history' => !empty($filtered) 
+                        ? json_encode(array_values($filtered)) 
+                        : null
+                ]);
+            } elseif ($commentsHistory === '') {
+                $this->merge(['comments_history' => null]);
+            }
+        }
     }
 
     /**

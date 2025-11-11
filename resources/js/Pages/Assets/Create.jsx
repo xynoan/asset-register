@@ -19,15 +19,6 @@ export default function Create({ employees }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('assets.store'), {
-            transform: (data) => ({
-                ...data,
-                maintenance_history: data.maintenance_history.length > 0 
-                    ? JSON.stringify(data.maintenance_history) 
-                    : '',
-                comments_history: data.comments_history.length > 0 
-                    ? JSON.stringify(data.comments_history) 
-                    : ''
-            }),
             onSuccess: () => {
                 window.location.href = route('assets.index');
             },
