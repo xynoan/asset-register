@@ -146,19 +146,19 @@ export default function Index({ assets, flash }) {
                                             <td>
                                                 <Link
                                                     href={route('assets.show', asset.id)}
-                                                    className="btn btn-sm btn-outline-primary me-2"
+                                                    className="btn btn-sm btn-outline-primary me-2 my-1"
                                                 >
                                                     View
                                                 </Link>
                                                 <Link
                                                     href={route('assets.edit', asset.id)}
-                                                    className="btn btn-sm btn-outline-secondary me-2"
+                                                    className="btn btn-sm btn-outline-secondary me-2 my-1"
                                                 >
                                                     Edit
                                                 </Link>
                                                 <button
                                                     onClick={() => handleDelete(asset.id, asset.asset_id)}
-                                                    className="btn btn-sm btn-outline-danger"
+                                                    className="btn btn-sm btn-outline-danger my-1"
                                                     disabled={processing}
                                                 >
                                                     Delete
