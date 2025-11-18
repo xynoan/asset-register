@@ -102,7 +102,11 @@ export default function Index({ assets, flash }) {
                                                     onClick={() => toggleRow(asset.id)}
                                                     title={expandedRows[asset.id] ? 'Hide comment' : 'Add comment'}
                                                 >
-                                                    {expandedRows[asset.id] ? '▼' : '▶'}
+                                                    {expandedRows[asset.id] ? (
+                                                        <i className="fas fa-chevron-down"></i>
+                                                    ) : (
+                                                        <i className="far fa-comment"></i>
+                                                    )}
                                                 </button>
                                             </td>
                                             <td><strong>{asset.asset_id}</strong></td>
@@ -169,6 +173,48 @@ export default function Index({ assets, flash }) {
                                             <tr key={`${asset.id}-comment`}>
                                                 <td colSpan="12" className="bg-light">
                                                     <div className="p-3">
+                                                        {/* Parse and display existing comments */}
+                                                        {(() => {
+                                                            let commentsHistory = [];
+                                                            if (asset.comments_history) {
+                                                                if (Array.isArray(asset.comments_history)) {
+                                                                    commentsHistory = asset.comments_history;
+                                                                } else if (typeof asset.comments_history === 'string') {
+                                                                    try {
+                                                                        const parsed = JSON.parse(asset.comments_history);
+                                                                        commentsHistory = Array.isArray(parsed) ? parsed : [];
+                                                                    } catch (e) {
+                                                                        commentsHistory = [];
+                                                                    }
+                                                                }
+                                                            }
+                                                            return commentsHistory.length > 0 ? (
+                                                                <div className="mb-3">
+                                                                    <h6 className="mb-2">Comments</h6>
+                                                                    <div className="table-responsive">
+                                                                        <table className="table table-bordered table-sm mb-3">
+                                                                            <thead className="table-light">
+                                                                                <tr>
+                                                                                    <th style={{ width: '15%' }}>Date</th>
+                                                                                    <th style={{ width: '60%' }}>Comment</th>
+                                                                                    <th style={{ width: '25%' }}>Added By</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {commentsHistory.map((entry, index) => (
+                                                                                    <tr key={index}>
+                                                                                        <td>{entry.date ? moment(entry.date).format('DD/MM/YYYY') : 'N/A'}</td>
+                                                                                        <td>{entry.comment || 'N/A'}</td>
+                                                                                        <td>{entry.added_by || 'N/A'}</td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            ) : null;
+                                                        })()}
+                                                        
                                                         <h6 className="mb-2">Add Comment</h6>
                                                         <form onSubmit={(e) => handleCommentSubmit(asset.id, e)}>
                                                             <div className="mb-2">

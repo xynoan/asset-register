@@ -21,20 +21,7 @@ export default function Edit({ asset, employees }) {
         }
     };
 
-    // Parse comments_history - should already be an array due to model cast, but handle string just in case
-    const parseCommentsHistory = () => {
-        if (!asset.comments_history) return [];
-        if (Array.isArray(asset.comments_history)) return asset.comments_history;
-        try {
-            const parsed = JSON.parse(asset.comments_history);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            return [];
-        }
-    };
-
     const initialMaintenanceHistory = parseMaintenanceHistory();
-    const initialCommentsHistory = parseCommentsHistory();
 
     useEffect(() => {
         // Fetch lookups
@@ -62,7 +49,6 @@ export default function Edit({ asset, employees }) {
         warranty_expiry_date: asset.warranty_expiry_date ? moment(asset.warranty_expiry_date).format('YYYY-MM-DD') : '',
         status: asset.status || 'Spare',
         maintenance_history: initialMaintenanceHistory,
-        comments_history: initialCommentsHistory,
         documents: [],
         removed_documents: [],
         assigned_to: asset.assigned_to || '',
@@ -110,28 +96,6 @@ export default function Edit({ asset, employees }) {
         const updated = [...data.maintenance_history];
         updated[index] = { ...updated[index], [field]: value };
         setData('maintenance_history', updated);
-    };
-
-    const addCommentEntry = () => {
-        const user = auth?.user;
-        const addedBy = user?.name || 'System';
-        const today = new Date().toISOString().split('T')[0];
-        setData('comments_history', [
-            ...data.comments_history,
-            { date: today, comment: '', added_by: addedBy }
-        ]);
-    };
-
-    const removeCommentEntry = (index) => {
-        setData('comments_history', 
-            data.comments_history.filter((_, i) => i !== index)
-        );
-    };
-
-    const updateCommentEntry = (index, field, value) => {
-        const updated = [...data.comments_history];
-        updated[index] = { ...updated[index], [field]: value };
-        setData('comments_history', updated);
     };
 
     const handleDocumentChange = (e) => {
@@ -495,83 +459,6 @@ export default function Edit({ asset, employees }) {
                                 {errors.maintenance_history && (
                                     <div className="invalid-feedback d-block">
                                         {errors.maintenance_history}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="mb-3">
-                                <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <label htmlFor="comments_history" className="form-label mb-0">Comments / History</label>
-                                    <button
-                                        type="button"
-                                        className="btn btn-sm btn-outline-primary"
-                                        onClick={addCommentEntry}
-                                    >
-                                        + Add Entry
-                                    </button>
-                                </div>
-                                {data.comments_history.length > 0 ? (
-                                    <div className="table-responsive">
-                                        <table className="table table-bordered table-sm">
-                                            <thead className="table-light">
-                                                <tr>
-                                                    <th style={{ width: '15%' }}>Date</th>
-                                                    <th style={{ width: '55%' }}>Comment</th>
-                                                    <th style={{ width: '20%' }}>Added By</th>
-                                                    <th style={{ width: '10%' }}>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {data.comments_history.map((entry, index) => (
-                                                    <tr key={index}>
-                                                        <td>
-                                                            <input
-                                                                type="date"
-                                                                className="form-control form-control-sm"
-                                                                value={entry.date || ''}
-                                                                onChange={e => updateCommentEntry(index, 'date', e.target.value)}
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control form-control-sm"
-                                                                value={entry.comment || ''}
-                                                                onChange={e => updateCommentEntry(index, 'comment', e.target.value)}
-                                                                placeholder="Enter comment or note"
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control form-control-sm"
-                                                                value={entry.added_by || ''}
-                                                                onChange={e => updateCommentEntry(index, 'added_by', e.target.value)}
-                                                                placeholder="Name"
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-sm btn-outline-danger"
-                                                                onClick={() => removeCommentEntry(index)}
-                                                            >
-                                                                Remove
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                ) : (
-                                    <div className="text-muted text-center py-3 border rounded">
-                                        No comment entries. Click "Add Entry" to add one.
-                                    </div>
-                                )}
-                                {errors.comments_history && (
-                                    <div className="invalid-feedback d-block">
-                                        {errors.comments_history}
                                     </div>
                                 )}
                             </div>

@@ -24,18 +24,6 @@ export default function Show({ asset }) {
         }
     };
 
-    // Parse comments_history - should already be an array due to model cast, but handle string just in case
-    const parseCommentsHistory = () => {
-        if (!asset.comments_history) return [];
-        if (Array.isArray(asset.comments_history)) return asset.comments_history;
-        try {
-            const parsed = JSON.parse(asset.comments_history);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            return [];
-        }
-    };
-
     // Parse document_paths - handle both string (JSON) and array formats
     const parseDocumentPaths = () => {
         if (!asset.document_paths) return [];
@@ -59,7 +47,6 @@ export default function Show({ asset }) {
     };
 
     const maintenanceHistory = parseMaintenanceHistory();
-    const commentsHistory = parseCommentsHistory();
     const documentPaths = parseDocumentPaths();
     const documentUrls = asset.document_urls || [];
 
@@ -228,36 +215,6 @@ export default function Show({ asset }) {
                                                             <td>{entry.description || 'N/A'}</td>
                                                             <td>{entry.cost || 'N/A'}</td>
                                                             <td>{entry.performed_by || 'N/A'}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {commentsHistory.length > 0 && (
-                            <div className="row">
-                                <div className="col-12">
-                                    <div className="mb-3">
-                                        <label className="form-label fw-bold">Comments / History:</label>
-                                        <div className="table-responsive">
-                                            <table className="table table-bordered table-sm">
-                                                <thead className="table-light">
-                                                    <tr>
-                                                        <th style={{ width: '15%' }}>Date</th>
-                                                        <th style={{ width: '55%' }}>Comment</th>
-                                                        <th style={{ width: '30%' }}>Added By</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {commentsHistory.map((entry, index) => (
-                                                        <tr key={index}>
-                                                            <td>{entry.date ? moment(entry.date).format('DD/MM/YYYY') : 'N/A'}</td>
-                                                            <td>{entry.comment || 'N/A'}</td>
-                                                            <td>{entry.added_by || 'N/A'}</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
