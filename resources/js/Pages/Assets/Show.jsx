@@ -126,6 +126,11 @@ export default function Show({ asset }) {
                                         <span className={`badge ${getStatusBadgeClass(asset.status)}`}>
                                             {asset.status}
                                         </span>
+                                        {asset.status_duration_string && (
+                                            <small className="ms-2 text-muted">
+                                                ({asset.status_duration_string})
+                                            </small>
+                                        )}
                                     </p>
                                 </div>
                             </div>

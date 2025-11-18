@@ -1,6 +1,29 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export default function Create({ employees }) {
+    const { auth } = usePage().props;
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [suppliers, setSuppliers] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Fetch lookups
+        Promise.all([
+            axios.get(route('lookups.categories')),
+            axios.get(route('lookups.brands')),
+            axios.get(route('lookups.suppliers'))
+        ]).then(([catsRes, brandsRes, suppRes]) => {
+            setCategories(catsRes.data.data || []);
+            setBrands(brandsRes.data.data || []);
+            setSuppliers(suppRes.data.data || []);
+            setLoading(false);
+        }).catch(() => {
+            setLoading(false);
+        });
+    }, []);
     const { data, setData, post, processing, errors, reset } = useForm({
         asset_category: '',
         brand_manufacturer: '',
@@ -48,9 +71,12 @@ export default function Create({ employees }) {
     };
 
     const addCommentEntry = () => {
+        const user = auth?.user;
+        const addedBy = user?.name || 'System';
+        const today = new Date().toISOString().split('T')[0];
         setData('comments_history', [
             ...data.comments_history,
-            { date: '', comment: '', added_by: '' }
+            { date: today, comment: '', added_by: addedBy }
         ]);
     };
 
@@ -77,21 +103,6 @@ export default function Create({ employees }) {
         const updated = data.documents.filter((_, i) => i !== index);
         setData('documents', updated);
     };
-
-    const assetCategories = [
-        'Keyboard',
-        'Mouse',
-        'Monitor',
-        'Printer',
-        'Scanner',
-        'Headset',
-        'Webcam',
-        'Speakers',
-        'Hard Drive',
-        'SSD',
-        'USB Drive',
-        'Other'
-    ];
 
     const statusOptions = ['In-use', 'Spare', 'Under Maintenance', 'Retired'];
 
@@ -125,10 +136,11 @@ export default function Create({ employees }) {
                                             value={data.asset_category}
                                             onChange={e => setData('asset_category', e.target.value)}
                                             required
+                                            disabled={loading}
                                         >
                                             <option value="">Select Category</option>
-                                            {assetCategories.map(category => (
-                                                <option key={category} value={category}>{category}</option>
+                                            {categories.map(category => (
+                                                <option key={category.id} value={category.name}>{category.name}</option>
                                             ))}
                                         </select>
                                         {errors.asset_category && (
@@ -141,14 +153,19 @@ export default function Create({ employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <label htmlFor="brand_manufacturer" className="form-label">Brand / Manufacturer *</label>
-                                        <input 
-                                            type="text" 
-                                            className={`form-control ${errors.brand_manufacturer ? 'is-invalid' : ''}`}
+                                        <select
+                                            className={`form-select ${errors.brand_manufacturer ? 'is-invalid' : ''}`}
                                             id="brand_manufacturer"
                                             value={data.brand_manufacturer}
                                             onChange={e => setData('brand_manufacturer', e.target.value)}
                                             required
-                                        />
+                                            disabled={loading}
+                                        >
+                                            <option value="">Select Brand / Manufacturer</option>
+                                            {brands.map(brand => (
+                                                <option key={brand.id} value={brand.name}>{brand.name}</option>
+                                            ))}
+                                        </select>
                                         {errors.brand_manufacturer && (
                                             <div className="invalid-feedback">
                                                 {errors.brand_manufacturer}
@@ -219,13 +236,18 @@ export default function Create({ employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <label htmlFor="vendor_supplier" className="form-label">Vendor / Supplier</label>
-                                        <input 
-                                            type="text" 
-                                            className={`form-control ${errors.vendor_supplier ? 'is-invalid' : ''}`}
+                                        <select
+                                            className={`form-select ${errors.vendor_supplier ? 'is-invalid' : ''}`}
                                             id="vendor_supplier"
                                             value={data.vendor_supplier}
                                             onChange={e => setData('vendor_supplier', e.target.value)}
-                                        />
+                                            disabled={loading}
+                                        >
+                                            <option value="">Select Supplier</option>
+                                            {suppliers.map(supplier => (
+                                                <option key={supplier.id} value={supplier.name}>{supplier.name}</option>
+                                            ))}
+                                        </select>
                                         {errors.vendor_supplier && (
                                             <div className="invalid-feedback">
                                                 {errors.vendor_supplier}
@@ -355,13 +377,18 @@ export default function Create({ employees }) {
                                                             />
                                                         </td>
                                                         <td>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control form-control-sm"
+                                                            <select
+                                                                className="form-select form-select-sm"
                                                                 value={entry.performed_by || ''}
                                                                 onChange={e => updateMaintenanceEntry(index, 'performed_by', e.target.value)}
-                                                                placeholder="Technician name"
-                                                            />
+                                                            >
+                                                                <option value="">Select Employee</option>
+                                                                {employees.map(employee => (
+                                                                    <option key={employee.id} value={employee.id}>
+                                                                        {employee.full_name} ({employee.employee_no})
+                                                                    </option>
+                                                                ))}
+                                                            </select>
                                                         </td>
                                                         <td>
                                                             <button

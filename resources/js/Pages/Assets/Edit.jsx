@@ -1,7 +1,14 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import moment from 'moment';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export default function Edit({ asset, employees }) {
+    const { auth } = usePage().props;
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [suppliers, setSuppliers] = useState([]);
+    const [loading, setLoading] = useState(true);
     // Parse maintenance_history - handle both string (JSON) and array formats
     const parseMaintenanceHistory = () => {
         if (!asset.maintenance_history) return [];
@@ -29,6 +36,22 @@ export default function Edit({ asset, employees }) {
     const initialMaintenanceHistory = parseMaintenanceHistory();
     const initialCommentsHistory = parseCommentsHistory();
 
+    useEffect(() => {
+        // Fetch lookups
+        Promise.all([
+            axios.get(route('lookups.categories')),
+            axios.get(route('lookups.brands')),
+            axios.get(route('lookups.suppliers'))
+        ]).then(([catsRes, brandsRes, suppRes]) => {
+            setCategories(catsRes.data.data || []);
+            setBrands(brandsRes.data.data || []);
+            setSuppliers(suppRes.data.data || []);
+            setLoading(false);
+        }).catch(() => {
+            setLoading(false);
+        });
+    }, []);
+
     const { data, setData, put, post, processing, errors, reset } = useForm({
         asset_category: asset.asset_category || '',
         brand_manufacturer: asset.brand_manufacturer || '',
@@ -41,14 +64,15 @@ export default function Edit({ asset, employees }) {
         maintenance_history: initialMaintenanceHistory,
         comments_history: initialCommentsHistory,
         documents: [],
+        removed_documents: [],
         assigned_to: asset.assigned_to || '',
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // When files are present, use POST route to avoid method spoofing issues
+        // When files are present or documents are removed, use POST route to avoid method spoofing issues
         // When no files, use PUT for cleaner semantics
-        if (data.documents.length > 0) {
+        if (data.documents.length > 0 || data.removed_documents.length > 0) {
             post(route('assets.update.post', asset.id), {
                 onSuccess: () => {
                     window.location.href = route('assets.show', asset.id);
@@ -89,9 +113,12 @@ export default function Edit({ asset, employees }) {
     };
 
     const addCommentEntry = () => {
+        const user = auth?.user;
+        const addedBy = user?.name || 'System';
+        const today = new Date().toISOString().split('T')[0];
         setData('comments_history', [
             ...data.comments_history,
-            { date: '', comment: '', added_by: '' }
+            { date: today, comment: '', added_by: addedBy }
         ]);
     };
 
@@ -119,20 +146,11 @@ export default function Edit({ asset, employees }) {
         setData('documents', updated);
     };
 
-    const assetCategories = [
-        'Keyboard',
-        'Mouse',
-        'Monitor',
-        'Printer',
-        'Scanner',
-        'Headset',
-        'Webcam',
-        'Speakers',
-        'Hard Drive',
-        'SSD',
-        'USB Drive',
-        'Other'
-    ];
+    const removeExistingDocument = (index) => {
+        // Track the index of removed existing documents
+        const removed = [...data.removed_documents, index];
+        setData('removed_documents', removed);
+    };
 
     const statusOptions = ['In-use', 'Spare', 'Under Maintenance', 'Retired'];
 
@@ -140,20 +158,22 @@ export default function Edit({ asset, employees }) {
     const parseDocumentPaths = () => {
         if (!asset.document_paths) return [];
         if (Array.isArray(asset.document_paths)) {
-            return asset.document_paths.map(doc => {
+            return asset.document_paths.map((doc, index) => {
                 // Handle new format: {path: "...", original_name: "..."}
+                let parsedDoc;
                 if (typeof doc === 'object' && doc !== null && doc.original_name) {
-                    return doc;
-                }
-                // Handle old format: just a string path
-                if (typeof doc === 'string') {
-                    return {
+                    parsedDoc = doc;
+                } else if (typeof doc === 'string') {
+                    // Handle old format: just a string path
+                    parsedDoc = {
                         path: doc,
                         original_name: doc.split('/').pop() || 'Unknown'
                     };
+                } else {
+                    parsedDoc = { path: '', original_name: 'Unknown' };
                 }
-                return { path: '', original_name: 'Unknown' };
-            });
+                return { ...parsedDoc, originalIndex: index };
+            }).filter(doc => !data.removed_documents.includes(doc.originalIndex));
         }
         return [];
     };
@@ -199,10 +219,11 @@ export default function Edit({ asset, employees }) {
                                             value={data.asset_category}
                                             onChange={e => setData('asset_category', e.target.value)}
                                             required
+                                            disabled={loading}
                                         >
                                             <option value="">Select Category</option>
-                                            {assetCategories.map(category => (
-                                                <option key={category} value={category}>{category}</option>
+                                            {categories.map(category => (
+                                                <option key={category.id} value={category.name}>{category.name}</option>
                                             ))}
                                         </select>
                                         {errors.asset_category && (
@@ -215,14 +236,19 @@ export default function Edit({ asset, employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <label htmlFor="brand_manufacturer" className="form-label">Brand / Manufacturer *</label>
-                                        <input 
-                                            type="text" 
-                                            className={`form-control ${errors.brand_manufacturer ? 'is-invalid' : ''}`}
+                                        <select
+                                            className={`form-select ${errors.brand_manufacturer ? 'is-invalid' : ''}`}
                                             id="brand_manufacturer"
                                             value={data.brand_manufacturer}
                                             onChange={e => setData('brand_manufacturer', e.target.value)}
                                             required
-                                        />
+                                            disabled={loading}
+                                        >
+                                            <option value="">Select Brand / Manufacturer</option>
+                                            {brands.map(brand => (
+                                                <option key={brand.id} value={brand.name}>{brand.name}</option>
+                                            ))}
+                                        </select>
                                         {errors.brand_manufacturer && (
                                             <div className="invalid-feedback">
                                                 {errors.brand_manufacturer}
@@ -293,13 +319,18 @@ export default function Edit({ asset, employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <label htmlFor="vendor_supplier" className="form-label">Vendor / Supplier</label>
-                                        <input 
-                                            type="text" 
-                                            className={`form-control ${errors.vendor_supplier ? 'is-invalid' : ''}`}
+                                        <select
+                                            className={`form-select ${errors.vendor_supplier ? 'is-invalid' : ''}`}
                                             id="vendor_supplier"
                                             value={data.vendor_supplier}
                                             onChange={e => setData('vendor_supplier', e.target.value)}
-                                        />
+                                            disabled={loading}
+                                        >
+                                            <option value="">Select Supplier</option>
+                                            {suppliers.map(supplier => (
+                                                <option key={supplier.id} value={supplier.name}>{supplier.name}</option>
+                                            ))}
+                                        </select>
                                         {errors.vendor_supplier && (
                                             <div className="invalid-feedback">
                                                 {errors.vendor_supplier}
@@ -429,13 +460,18 @@ export default function Edit({ asset, employees }) {
                                                             />
                                                         </td>
                                                         <td>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control form-control-sm"
+                                                            <select
+                                                                className="form-select form-select-sm"
                                                                 value={entry.performed_by || ''}
                                                                 onChange={e => updateMaintenanceEntry(index, 'performed_by', e.target.value)}
-                                                                placeholder="Technician name"
-                                                            />
+                                                            >
+                                                                <option value="">Select Employee</option>
+                                                                {employees.map(employee => (
+                                                                    <option key={employee.id} value={employee.id}>
+                                                                        {employee.full_name} ({employee.employee_no})
+                                                                    </option>
+                                                                ))}
+                                                            </select>
                                                         </td>
                                                         <td>
                                                             <button
@@ -557,11 +593,18 @@ export default function Edit({ asset, employees }) {
                                     <div className="mt-3">
                                         <h6 className="mb-2">Existing Documents:</h6>
                                         <ul className="list-group">
-                                            {existingDocuments.map((doc, index) => {
-                                                const fileName = doc.original_name || (typeof doc === 'string' ? doc.split('/').pop() : 'Unknown');
+                                            {existingDocuments.map((doc) => {
+                                                const fileName = doc.original_name || 'Unknown';
                                                 return (
-                                                    <li key={index} className="list-group-item">
+                                                    <li key={doc.originalIndex} className="list-group-item d-flex justify-content-between align-items-center">
                                                         <span>{fileName}</span>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-sm btn-outline-danger"
+                                                            onClick={() => removeExistingDocument(doc.originalIndex)}
+                                                        >
+                                                            Remove
+                                                        </button>
                                                     </li>
                                                 );
                                             })}

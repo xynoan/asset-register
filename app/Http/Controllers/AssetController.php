@@ -17,6 +17,21 @@ use Inertia\Response;
 class AssetController extends Controller
 {
     /**
+     * Display the dashboard with assets for quick comments.
+     */
+    public function dashboard(Request $request): Response
+    {
+        $assets = Asset::with(['assignedEmployee'])
+            ->orderBy('created_at', 'desc')
+            ->limit(20) // Show last 20 assets
+            ->get();
+
+        return Inertia::render('Dashboard', [
+            'assets' => $assets,
+        ]);
+    }
+
+    /**
      * Display a listing of the assets.
      */
     public function index(Request $request)
@@ -25,13 +40,15 @@ class AssetController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        // Add document count to each asset
+        // Add document count and status duration to each asset
         $assets->getCollection()->transform(function ($asset) {
             $documentCount = 0;
             if ($asset->document_paths && is_array($asset->document_paths)) {
                 $documentCount = count($asset->document_paths);
             }
             $asset->document_count = $documentCount;
+            $asset->status_duration_days = $asset->getStatusDurationDays();
+            $asset->status_duration_string = $asset->getStatusDurationString();
             return $asset;
         });
 
@@ -104,7 +121,11 @@ class AssetController extends Controller
             'assigned_to' => $assignedTo,
             'created_by' => $userId,
             'updated_by' => $userId,
+            'status_changed_at' => now(),
         ]);
+
+        // Record initial status in status history
+        $asset->recordStatusChange($validated['status'], $userId);
 
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
@@ -124,6 +145,10 @@ class AssetController extends Controller
     public function show(Request $request, Asset $asset)
     {
         $asset->load(['assignedEmployee', 'creator', 'updater']);
+
+        // Add status duration
+        $asset->status_duration_days = $asset->getStatusDurationDays();
+        $asset->status_duration_string = $asset->getStatusDurationString();
 
         // Convert document paths to URLs for frontend access
         // Also normalize document structure for backward compatibility
@@ -190,7 +215,21 @@ class AssetController extends Controller
         // Convert empty string to null for assigned_to
         $assignedTo = !empty($validated['assigned_to']) ? (int) $validated['assigned_to'] : null;
 
-        // Handle document uploads - merge with existing documents
+        // Handle document removal - delete files from storage
+        $removedDocuments = $request->input('removed_documents', []);
+        if (!empty($removedDocuments) && is_array($removedDocuments)) {
+            foreach ($removedDocuments as $docIndex) {
+                if (isset($asset->document_paths[$docIndex])) {
+                    $doc = $asset->document_paths[$docIndex];
+                    $docPath = is_array($doc) ? $doc['path'] : $doc;
+                    if (Storage::disk('public')->exists($docPath)) {
+                        Storage::disk('public')->delete($docPath);
+                    }
+                }
+            }
+        }
+
+        // Handle document uploads - merge with existing documents (excluding removed ones)
         // Normalize existing documents to ensure they have the new structure
         $documentPaths = $asset->document_paths ?? [];
         if (!empty($documentPaths)) {
@@ -205,6 +244,14 @@ class AssetController extends Controller
                 // Already in new format
                 return $doc;
             }, $documentPaths);
+
+            // Remove documents that were marked for deletion
+            if (!empty($removedDocuments)) {
+                foreach ($removedDocuments as $docIndex) {
+                    unset($documentPaths[$docIndex]);
+                }
+                $documentPaths = array_values($documentPaths); // Re-index array
+            }
         }
         
         if ($request->hasFile('documents')) {
@@ -217,6 +264,15 @@ class AssetController extends Controller
             }
         }
 
+        // Check if status changed and record it
+        $oldStatus = $asset->status;
+        $newStatus = $validated['status'];
+        
+        // Record status change if status was modified (before update so it's included in the update)
+        if ($oldStatus !== $newStatus) {
+            $asset->recordStatusChange($newStatus, $userId);
+        }
+        
         $updateData = [
             'asset_category' => $validated['asset_category'],
             'brand_manufacturer' => $validated['brand_manufacturer'],
@@ -232,6 +288,12 @@ class AssetController extends Controller
             'assigned_to' => $assignedTo,
             'updated_by' => $userId,
         ];
+
+        // Include status_history and status_changed_at if status changed
+        if ($oldStatus !== $newStatus) {
+            $updateData['status_history'] = $asset->status_history;
+            $updateData['status_changed_at'] = $asset->status_changed_at;
+        }
 
         $asset->update($updateData);
 
@@ -353,5 +415,46 @@ class AssetController extends Controller
         );
 
         return $systemUser->id;
+    }
+
+    /**
+     * Add a comment to an asset from the dashboard.
+     */
+    public function addComment(Request $request, Asset $asset)
+    {
+        $request->validate([
+            'comment' => ['required', 'string', 'max:1000']
+        ]);
+
+        $userId = Auth::id() ?? $this->getDefaultUserId();
+        $user = Auth::user();
+        $addedBy = $user ? $user->name : 'System';
+
+        // Get existing comments or initialize array
+        $commentsHistory = $asset->comments_history ?? [];
+
+        // Add new comment with auto-populated values
+        $commentsHistory[] = [
+            'date' => now()->format('Y-m-d'),
+            'comment' => $request->comment,
+            'added_by' => $addedBy,
+            'added_at' => now()->toDateTimeString(),
+        ];
+
+        $asset->update([
+            'comments_history' => $commentsHistory,
+            'updated_by' => $userId,
+        ]);
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment added successfully!',
+                'data' => $asset->load(['assignedEmployee', 'creator', 'updater'])
+            ]);
+        }
+
+        return redirect()->back()
+            ->with('success', 'Comment added successfully!');
     }
 }

@@ -34,6 +34,8 @@ class UpdateAssetRequest extends FormRequest
             'comments_history' => ['nullable', 'string'],
             'documents' => ['nullable', 'array'],
             'documents.*' => ['file', 'max:10240', 'mimes:pdf,doc,docx,jpg,jpeg,png,txt'],
+            'removed_documents' => ['nullable', 'array'],
+            'removed_documents.*' => ['integer'],
             'assigned_to' => ['nullable', 'sometimes', 'exists:tbl_employees,id'],
         ];
     }

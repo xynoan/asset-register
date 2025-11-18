@@ -31,6 +31,8 @@ class Asset extends Model
         'vendor_supplier',
         'warranty_expiry_date',
         'status',
+        'status_history',
+        'status_changed_at',
         'maintenance_history',
         'comments_history',
         'document_paths',
@@ -47,6 +49,8 @@ class Asset extends Model
     protected $casts = [
         'purchase_date' => 'date',
         'warranty_expiry_date' => 'date',
+        'status_history' => 'array',
+        'status_changed_at' => 'datetime',
         'comments_history' => 'array',
         'document_paths' => 'array',
         'created_at' => 'datetime',
@@ -75,5 +79,48 @@ class Asset extends Model
     public function updater()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Record a status change in the status history.
+     */
+    public function recordStatusChange(string $newStatus, int $userId): void
+    {
+        $history = $this->status_history ?? [];
+        
+        $history[] = [
+            'status' => $newStatus,
+            'changed_at' => now()->toDateTimeString(),
+            'changed_by' => $userId,
+        ];
+
+        $this->status_history = $history;
+        $this->status_changed_at = now();
+    }
+
+    /**
+     * Calculate the duration in days for the current status.
+     */
+    public function getStatusDurationDays(): ?int
+    {
+        if (!$this->status_changed_at) {
+            return null;
+        }
+
+        return now()->diffInDays($this->status_changed_at);
+    }
+
+    /**
+     * Get formatted status duration string.
+     */
+    public function getStatusDurationString(): string
+    {
+        $days = $this->getStatusDurationDays();
+        
+        if ($days === null) {
+            return 'Unknown';
+        }
+
+        return "{$this->status} for {$days} " . ($days === 1 ? 'day' : 'days');
     }
 }

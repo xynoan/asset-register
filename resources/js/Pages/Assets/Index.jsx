@@ -55,6 +55,7 @@ export default function Index({ assets, flash }) {
                                     <th>Status</th>
                                     <th>Assigned To</th>
                                     <th>Purchase Date</th>
+                                    <th>Status Duration</th>
                                     <th>Attachments</th>
                                     <th>Actions</th>
                                 </tr>
@@ -82,6 +83,11 @@ export default function Index({ assets, flash }) {
                                             }
                                         </td>
                                         <td>{moment(asset.purchase_date).format('DD/MM/YYYY')}</td>
+                                        <td>
+                                            <small className="text-muted">
+                                                {asset.status_duration_string || 'Unknown'}
+                                            </small>
+                                        </td>
                                         <td>
                                             {asset.document_count > 0 ? (
                                                 <Link
