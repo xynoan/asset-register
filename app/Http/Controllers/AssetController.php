@@ -431,7 +431,17 @@ class AssetController extends Controller
         $addedBy = $user ? $user->name : 'System';
 
         // Get existing comments or initialize array
-        $commentsHistory = $asset->comments_history ?? [];
+        // Ensure it's always an array, even if cast fails or returns a string
+        $commentsHistory = $asset->comments_history;
+        if (!is_array($commentsHistory)) {
+            // If it's a string, try to decode it, otherwise use empty array
+            if (is_string($commentsHistory) && !empty($commentsHistory)) {
+                $decoded = json_decode($commentsHistory, true);
+                $commentsHistory = is_array($decoded) ? $decoded : [];
+            } else {
+                $commentsHistory = [];
+            }
+        }
 
         // Add new comment with auto-populated values
         $commentsHistory[] = [
