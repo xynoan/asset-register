@@ -9,8 +9,19 @@ export default function Create({ employees }) {
     const [suppliers, setSuppliers] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Fetch lookups
+    // States for adding new values
+    const [showAddCategory, setShowAddCategory] = useState(false);
+    const [showAddBrand, setShowAddBrand] = useState(false);
+    const [showAddSupplier, setShowAddSupplier] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [newBrandName, setNewBrandName] = useState('');
+    const [newSupplierName, setNewSupplierName] = useState('');
+    const [addingCategory, setAddingCategory] = useState(false);
+    const [addingBrand, setAddingBrand] = useState(false);
+    const [addingSupplier, setAddingSupplier] = useState(false);
+
+    const fetchLookups = () => {
+        setLoading(true);
         Promise.all([
             axios.get(route('lookups.categories')),
             axios.get(route('lookups.brands')),
@@ -23,6 +34,10 @@ export default function Create({ employees }) {
         }).catch(() => {
             setLoading(false);
         });
+    };
+
+    useEffect(() => {
+        fetchLookups();
     }, []);
     const { data, setData, post, processing, errors, reset } = useForm({
         asset_category: '',
@@ -81,6 +96,135 @@ export default function Create({ employees }) {
         setData('documents', updated);
     };
 
+    const handleAddCategory = async () => {
+        if (!newCategoryName.trim()) return;
+        setAddingCategory(true);
+        try {
+            const response = await axios.post(route('lookups.categories.store'), {
+                name: newCategoryName.trim()
+            });
+            if (response.data.success) {
+                setCategories([...categories, response.data.data]);
+                setData('asset_category', response.data.data.name);
+                setNewCategoryName('');
+                setShowAddCategory(false);
+            }
+        } catch (error) {
+            if (error.response?.data?.errors?.name) {
+                alert(error.response.data.errors.name[0]);
+            } else {
+                alert('Failed to add category');
+            }
+        } finally {
+            setAddingCategory(false);
+        }
+    };
+
+    const handleAddBrand = async () => {
+        if (!newBrandName.trim()) return;
+        setAddingBrand(true);
+        try {
+            const response = await axios.post(route('lookups.brands.store'), {
+                name: newBrandName.trim()
+            });
+            if (response.data.success) {
+                setBrands([...brands, response.data.data]);
+                setData('brand_manufacturer', response.data.data.name);
+                setNewBrandName('');
+                setShowAddBrand(false);
+            }
+        } catch (error) {
+            if (error.response?.data?.errors?.name) {
+                alert(error.response.data.errors.name[0]);
+            } else {
+                alert('Failed to add brand');
+            }
+        } finally {
+            setAddingBrand(false);
+        }
+    };
+
+    const handleAddSupplier = async () => {
+        if (!newSupplierName.trim()) return;
+        setAddingSupplier(true);
+        try {
+            const response = await axios.post(route('lookups.suppliers.store'), {
+                name: newSupplierName.trim()
+            });
+            if (response.data.success) {
+                setSuppliers([...suppliers, response.data.data]);
+                setData('vendor_supplier', response.data.data.name);
+                setNewSupplierName('');
+                setShowAddSupplier(false);
+            }
+        } catch (error) {
+            if (error.response?.data?.errors?.name) {
+                alert(error.response.data.errors.name[0]);
+            } else {
+                alert('Failed to add supplier');
+            }
+        } finally {
+            setAddingSupplier(false);
+        }
+    };
+
+    const handleDeleteCategory = async (id, name) => {
+        if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+        try {
+            const response = await axios.delete(route('lookups.categories.delete', id));
+            if (response.data.success) {
+                setCategories(categories.filter(cat => cat.id !== id));
+                if (data.asset_category === name) {
+                    setData('asset_category', '');
+                }
+            }
+        } catch (error) {
+            if (error.response?.data?.message) {
+                alert(error.response.data.message);
+            } else {
+                alert('Failed to delete category');
+            }
+        }
+    };
+
+    const handleDeleteBrand = async (id, name) => {
+        if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+        try {
+            const response = await axios.delete(route('lookups.brands.delete', id));
+            if (response.data.success) {
+                setBrands(brands.filter(brand => brand.id !== id));
+                if (data.brand_manufacturer === name) {
+                    setData('brand_manufacturer', '');
+                }
+            }
+        } catch (error) {
+            if (error.response?.data?.message) {
+                alert(error.response.data.message);
+            } else {
+                alert('Failed to delete brand');
+            }
+        }
+    };
+
+    const handleDeleteSupplier = async (id, name) => {
+        if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+        try {
+            const response = await axios.delete(route('lookups.suppliers.delete', id));
+            if (response.data.success) {
+                setSuppliers(suppliers.filter(supplier => supplier.id !== id));
+                if (data.vendor_supplier === name) {
+                    setData('vendor_supplier', '');
+                }
+            }
+        } catch (error) {
+            if (error.response?.data?.message) {
+                alert(error.response.data.message);
+            } else {
+                alert('Failed to delete supplier');
+            }
+        }
+    };
+
     const statusOptions = ['In-use', 'Spare', 'Under Maintenance', 'Retired'];
 
     return (
@@ -106,7 +250,36 @@ export default function Create({ employees }) {
                             <div className="row">
                                 <div className="col-md-6">
                                     <div className="mb-3">
-                                        <label htmlFor="asset_category" className="form-label">Asset Category *</label>
+                                        <div className="d-flex justify-content-between align-items-center mb-1">
+                                            <label htmlFor="asset_category" className="form-label mb-0">Asset Category *</label>
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                onClick={() => setShowAddCategory(!showAddCategory)}
+                                            >
+                                                {showAddCategory ? 'Cancel' : '+ Add New'}
+                                            </button>
+                                        </div>
+                                        {showAddCategory ? (
+                                            <div className="input-group mb-2">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter new category"
+                                                    value={newCategoryName}
+                                                    onChange={e => setNewCategoryName(e.target.value)}
+                                                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddCategory())}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-primary"
+                                                    onClick={handleAddCategory}
+                                                    disabled={addingCategory || !newCategoryName.trim()}
+                                                >
+                                                    {addingCategory ? '...' : 'Add'}
+                                                </button>
+                                            </div>
+                                        ) : null}
                                         <select
                                             className={`form-select ${errors.asset_category ? 'is-invalid' : ''}`}
                                             id="asset_category"
@@ -117,9 +290,30 @@ export default function Create({ employees }) {
                                         >
                                             <option value="">Select Category</option>
                                             {categories.map(category => (
-                                                <option key={category.id} value={category.name}>{category.name}</option>
+                                                <option key={category.id} value={category.name}>
+                                                    {category.name}
+                                                </option>
                                             ))}
                                         </select>
+                                        {categories.length > 0 && (
+                                            <div className="mt-2">
+                                                <small className="text-muted">Quick delete:</small>
+                                                <div className="d-flex flex-wrap gap-1 mt-1">
+                                                    {categories.map(category => (
+                                                        <span
+                                                            key={category.id}
+                                                            className="badge bg-secondary d-flex align-items-center gap-1"
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => handleDeleteCategory(category.id, category.name)}
+                                                            title="Click to delete"
+                                                        >
+                                                            {category.name}
+                                                            <span>×</span>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                         {errors.asset_category && (
                                             <div className="invalid-feedback">
                                                 {errors.asset_category}
@@ -129,7 +323,36 @@ export default function Create({ employees }) {
                                 </div>
                                 <div className="col-md-6">
                                     <div className="mb-3">
-                                        <label htmlFor="brand_manufacturer" className="form-label">Brand / Manufacturer *</label>
+                                        <div className="d-flex justify-content-between align-items-center mb-1">
+                                            <label htmlFor="brand_manufacturer" className="form-label mb-0">Brand / Manufacturer *</label>
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                onClick={() => setShowAddBrand(!showAddBrand)}
+                                            >
+                                                {showAddBrand ? 'Cancel' : '+ Add New'}
+                                            </button>
+                                        </div>
+                                        {showAddBrand ? (
+                                            <div className="input-group mb-2">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter new brand"
+                                                    value={newBrandName}
+                                                    onChange={e => setNewBrandName(e.target.value)}
+                                                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddBrand())}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-primary"
+                                                    onClick={handleAddBrand}
+                                                    disabled={addingBrand || !newBrandName.trim()}
+                                                >
+                                                    {addingBrand ? '...' : 'Add'}
+                                                </button>
+                                            </div>
+                                        ) : null}
                                         <select
                                             className={`form-select ${errors.brand_manufacturer ? 'is-invalid' : ''}`}
                                             id="brand_manufacturer"
@@ -140,9 +363,30 @@ export default function Create({ employees }) {
                                         >
                                             <option value="">Select Brand / Manufacturer</option>
                                             {brands.map(brand => (
-                                                <option key={brand.id} value={brand.name}>{brand.name}</option>
+                                                <option key={brand.id} value={brand.name}>
+                                                    {brand.name}
+                                                </option>
                                             ))}
                                         </select>
+                                        {brands.length > 0 && (
+                                            <div className="mt-2">
+                                                <small className="text-muted">Quick delete:</small>
+                                                <div className="d-flex flex-wrap gap-1 mt-1">
+                                                    {brands.map(brand => (
+                                                        <span
+                                                            key={brand.id}
+                                                            className="badge bg-secondary d-flex align-items-center gap-1"
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => handleDeleteBrand(brand.id, brand.name)}
+                                                            title="Click to delete"
+                                                        >
+                                                            {brand.name}
+                                                            <span>×</span>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                         {errors.brand_manufacturer && (
                                             <div className="invalid-feedback">
                                                 {errors.brand_manufacturer}
@@ -212,7 +456,36 @@ export default function Create({ employees }) {
                                 </div>
                                 <div className="col-md-6">
                                     <div className="mb-3">
-                                        <label htmlFor="vendor_supplier" className="form-label">Vendor / Supplier</label>
+                                        <div className="d-flex justify-content-between align-items-center mb-1">
+                                            <label htmlFor="vendor_supplier" className="form-label mb-0">Vendor / Supplier</label>
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                onClick={() => setShowAddSupplier(!showAddSupplier)}
+                                            >
+                                                {showAddSupplier ? 'Cancel' : '+ Add New'}
+                                            </button>
+                                        </div>
+                                        {showAddSupplier ? (
+                                            <div className="input-group mb-2">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder="Enter new supplier"
+                                                    value={newSupplierName}
+                                                    onChange={e => setNewSupplierName(e.target.value)}
+                                                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddSupplier())}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-primary"
+                                                    onClick={handleAddSupplier}
+                                                    disabled={addingSupplier || !newSupplierName.trim()}
+                                                >
+                                                    {addingSupplier ? '...' : 'Add'}
+                                                </button>
+                                            </div>
+                                        ) : null}
                                         <select
                                             className={`form-select ${errors.vendor_supplier ? 'is-invalid' : ''}`}
                                             id="vendor_supplier"
@@ -222,9 +495,30 @@ export default function Create({ employees }) {
                                         >
                                             <option value="">Select Supplier</option>
                                             {suppliers.map(supplier => (
-                                                <option key={supplier.id} value={supplier.name}>{supplier.name}</option>
+                                                <option key={supplier.id} value={supplier.name}>
+                                                    {supplier.name}
+                                                </option>
                                             ))}
                                         </select>
+                                        {suppliers.length > 0 && (
+                                            <div className="mt-2">
+                                                <small className="text-muted">Quick delete:</small>
+                                                <div className="d-flex flex-wrap gap-1 mt-1">
+                                                    {suppliers.map(supplier => (
+                                                        <span
+                                                            key={supplier.id}
+                                                            className="badge bg-secondary d-flex align-items-center gap-1"
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => handleDeleteSupplier(supplier.id, supplier.name)}
+                                                            title="Click to delete"
+                                                        >
+                                                            {supplier.name}
+                                                            <span>×</span>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                         {errors.vendor_supplier && (
                                             <div className="invalid-feedback">
                                                 {errors.vendor_supplier}
