@@ -1,13 +1,43 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import moment from 'moment';
+import { useState } from 'react';
 
 export default function Index({ assets, flash }) {
     const { delete: destroy, processing } = useForm();
+    const { auth } = usePage().props;
+    const [commentInputs, setCommentInputs] = useState({});
+    const [submitting, setSubmitting] = useState({});
+    const [expandedRows, setExpandedRows] = useState({});
 
     const handleDelete = (assetId, assetName) => {
         if (confirm(`Are you sure you want to delete asset "${assetName}"? This action cannot be undone.`)) {
             destroy(route('assets.destroy', assetId));
         }
+    };
+
+    const handleCommentChange = (assetId, value) => {
+        setCommentInputs(prev => ({ ...prev, [assetId]: value }));
+    };
+
+    const handleCommentSubmit = (assetId, e) => {
+        e.preventDefault();
+        const comment = commentInputs[assetId]?.trim();
+        if (!comment || submitting[assetId]) return;
+
+        setSubmitting(prev => ({ ...prev, [assetId]: true }));
+
+        router.post(route('assets.comments', assetId), { comment }, {
+            preserveScroll: true,
+            onFinish: () => {
+                setSubmitting(prev => ({ ...prev, [assetId]: false }));
+                setCommentInputs(prev => ({ ...prev, [assetId]: '' }));
+                setExpandedRows(prev => ({ ...prev, [assetId]: false }));
+            },
+        });
+    };
+
+    const toggleRow = (assetId) => {
+        setExpandedRows(prev => ({ ...prev, [assetId]: !prev[assetId] }));
     };
 
     const getStatusBadgeClass = (status) => {
@@ -47,6 +77,7 @@ export default function Index({ assets, flash }) {
                         <table className="table table-striped">
                             <thead>
                                 <tr>
+                                    <th style={{ width: '30px' }}></th>
                                     <th>Asset ID</th>
                                     <th>Category</th>
                                     <th>Brand / Manufacturer</th>
@@ -62,67 +93,116 @@ export default function Index({ assets, flash }) {
                             </thead>
                             <tbody>
                                 {assets.data.map((asset) => (
-                                    <tr key={asset.id}>
-                                        <td><strong>{asset.asset_id}</strong></td>
-                                        <td>{asset.asset_category}</td>
-                                        <td>{asset.brand_manufacturer}</td>
-                                        <td>{asset.model_number}</td>
-                                        <td>{asset.serial_number}</td>
-                                        <td>
-                                            <span className={`badge ${getStatusBadgeClass(asset.status)}`}>
-                                                {asset.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {
-                                                asset.assigned_employee ? (
-                                                    <span>{asset.assigned_employee.employee_no}</span>
+                                    <>
+                                        <tr key={asset.id}>
+                                            <td>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-link p-0"
+                                                    onClick={() => toggleRow(asset.id)}
+                                                    title={expandedRows[asset.id] ? 'Hide comment' : 'Add comment'}
+                                                >
+                                                    {expandedRows[asset.id] ? '▼' : '▶'}
+                                                </button>
+                                            </td>
+                                            <td><strong>{asset.asset_id}</strong></td>
+                                            <td>{asset.asset_category}</td>
+                                            <td>{asset.brand_manufacturer}</td>
+                                            <td>{asset.model_number}</td>
+                                            <td>{asset.serial_number}</td>
+                                            <td>
+                                                <span className={`badge ${getStatusBadgeClass(asset.status)}`}>
+                                                    {asset.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {
+                                                    asset.assigned_employee ? (
+                                                        <span>{asset.assigned_employee.employee_no}</span>
+                                                    ) : (
+                                                        <span className="text-muted">Unassigned</span>
+                                                    )
+                                                }
+                                            </td>
+                                            <td>{moment(asset.purchase_date).format('DD/MM/YYYY')}</td>
+                                            <td>
+                                                <small className="text-muted">
+                                                    {asset.status_duration_string || 'Unknown'}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                {asset.document_count > 0 ? (
+                                                    <Link
+                                                        href={route('assets.show', asset.id)}
+                                                        className="badge bg-info text-decoration-none"
+                                                        title="Click to view attachments"
+                                                    >
+                                                        📎 {asset.document_count}
+                                                    </Link>
                                                 ) : (
-                                                    <span className="text-muted">Unassigned</span>
-                                                )
-                                            }
-                                        </td>
-                                        <td>{moment(asset.purchase_date).format('DD/MM/YYYY')}</td>
-                                        <td>
-                                            <small className="text-muted">
-                                                {asset.status_duration_string || 'Unknown'}
-                                            </small>
-                                        </td>
-                                        <td>
-                                            {asset.document_count > 0 ? (
+                                                    <span className="text-muted">—</span>
+                                                )}
+                                            </td>
+                                            <td>
                                                 <Link
                                                     href={route('assets.show', asset.id)}
-                                                    className="badge bg-info text-decoration-none"
-                                                    title="Click to view attachments"
+                                                    className="btn btn-sm btn-outline-primary me-2"
                                                 >
-                                                    📎 {asset.document_count}
+                                                    View
                                                 </Link>
-                                            ) : (
-                                                <span className="text-muted">—</span>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <Link
-                                                href={route('assets.show', asset.id)}
-                                                className="btn btn-sm btn-outline-primary me-2"
-                                            >
-                                                View
-                                            </Link>
-                                            <Link
-                                                href={route('assets.edit', asset.id)}
-                                                className="btn btn-sm btn-outline-secondary me-2"
-                                            >
-                                                Edit
-                                            </Link>
-                                            <button
-                                                onClick={() => handleDelete(asset.id, asset.asset_id)}
-                                                className="btn btn-sm btn-outline-danger"
-                                                disabled={processing}
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
+                                                <Link
+                                                    href={route('assets.edit', asset.id)}
+                                                    className="btn btn-sm btn-outline-secondary me-2"
+                                                >
+                                                    Edit
+                                                </Link>
+                                                <button
+                                                    onClick={() => handleDelete(asset.id, asset.asset_id)}
+                                                    className="btn btn-sm btn-outline-danger"
+                                                    disabled={processing}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {expandedRows[asset.id] && (
+                                            <tr key={`${asset.id}-comment`}>
+                                                <td colSpan="12" className="bg-light">
+                                                    <div className="p-3">
+                                                        <h6 className="mb-2">Add Comment</h6>
+                                                        <form onSubmit={(e) => handleCommentSubmit(asset.id, e)}>
+                                                            <div className="mb-2">
+                                                                <textarea
+                                                                    className="form-control"
+                                                                    rows="2"
+                                                                    placeholder="Enter your comment..."
+                                                                    value={commentInputs[asset.id] || ''}
+                                                                    onChange={(e) => handleCommentChange(asset.id, e.target.value)}
+                                                                />
+                                                                <small className="text-muted">
+                                                                    Comment will be attributed to: {auth?.user?.name || 'System'}
+                                                                </small>
+                                                            </div>
+                                                            <button
+                                                                type="submit"
+                                                                className="btn btn-sm btn-primary"
+                                                                disabled={!commentInputs[asset.id]?.trim() || submitting[asset.id]}
+                                                            >
+                                                                {submitting[asset.id] ? 'Submitting...' : 'Add Comment'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-secondary ms-2"
+                                                                onClick={() => toggleRow(asset.id)}
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </>
                                 ))}
                             </tbody>
                         </table>
@@ -160,4 +240,3 @@ export default function Index({ assets, flash }) {
         </>
     );
 }
-
