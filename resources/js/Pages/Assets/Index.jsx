@@ -40,6 +40,22 @@ export default function Index({ assets, flash }) {
         setExpandedRows(prev => ({ ...prev, [assetId]: !prev[assetId] }));
     };
 
+    const hasComments = (asset) => {
+        if (!asset.comments_history) return false;
+        let commentsHistory = [];
+        if (Array.isArray(asset.comments_history)) {
+            commentsHistory = asset.comments_history;
+        } else if (typeof asset.comments_history === 'string') {
+            try {
+                const parsed = JSON.parse(asset.comments_history);
+                commentsHistory = Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                commentsHistory = [];
+            }
+        }
+        return commentsHistory.length > 0;
+    };
+
     const getStatusBadgeClass = (status) => {
         const statusClasses = {
             'In-use': 'bg-success',
@@ -100,12 +116,12 @@ export default function Index({ assets, flash }) {
                                                     type="button"
                                                     className="btn btn-sm btn-link p-0"
                                                     onClick={() => toggleRow(asset.id)}
-                                                    title={expandedRows[asset.id] ? 'Hide comment' : 'Add comment'}
+                                                    title={expandedRows[asset.id] ? 'Hide comment' : hasComments(asset) ? 'View comments' : 'Add comment'}
                                                 >
                                                     {expandedRows[asset.id] ? (
                                                         <i className="fas fa-chevron-down"></i>
                                                     ) : (
-                                                        <i className="far fa-comment"></i>
+                                                        <i className={hasComments(asset) ? "fas fa-comment text-primary" : "far fa-comment"}></i>
                                                     )}
                                                 </button>
                                             </td>
