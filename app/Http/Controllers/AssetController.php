@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateAssetRequest;
 use App\Models\Asset;
 use App\Models\Employee;
 use App\Models\User;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
