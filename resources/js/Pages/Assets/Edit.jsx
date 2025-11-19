@@ -35,6 +35,20 @@ export default function Edit({ asset, employees }) {
 
     const initialMaintenanceHistory = parseMaintenanceHistory();
 
+    // Parse notes - handle both string (JSON) and array formats
+    const parseNotes = () => {
+        if (!asset.notes) return [];
+        if (Array.isArray(asset.notes)) return asset.notes;
+        try {
+            const parsed = JSON.parse(asset.notes);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
+    const initialNotes = parseNotes();
+
     const fetchLookups = () => {
         setLoading(true);
         Promise.all([
@@ -65,6 +79,7 @@ export default function Edit({ asset, employees }) {
         warranty_expiry_date: asset.warranty_expiry_date ? moment(asset.warranty_expiry_date).format('YYYY-MM-DD') : '',
         status: asset.status || 'Spare',
         maintenance_history: initialMaintenanceHistory,
+        notes: initialNotes,
         documents: [],
         removed_documents: [],
         assigned_to: asset.assigned_to || '',
@@ -112,6 +127,25 @@ export default function Edit({ asset, employees }) {
         const updated = [...data.maintenance_history];
         updated[index] = { ...updated[index], [field]: value };
         setData('maintenance_history', updated);
+    };
+
+    const addNote = () => {
+        setData('notes', [
+            ...data.notes,
+            { date: '', note: '' }
+        ]);
+    };
+
+    const removeNote = (index) => {
+        setData('notes', 
+            data.notes.filter((_, i) => i !== index)
+        );
+    };
+
+    const updateNote = (index, field, value) => {
+        const updated = [...data.notes];
+        updated[index] = { ...updated[index], [field]: value };
+        setData('notes', updated);
     };
 
     const handleDocumentChange = (e) => {
@@ -753,6 +787,73 @@ export default function Edit({ asset, employees }) {
                                 {errors.maintenance_history && (
                                     <div className="invalid-feedback d-block">
                                         {errors.maintenance_history}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3">
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <label htmlFor="notes" className="form-label mb-0">Notes</label>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={addNote}
+                                    >
+                                        + Add Note
+                                    </button>
+                                </div>
+                                {data.notes.length > 0 ? (
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered table-sm">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th style={{ width: '20%' }}>Date</th>
+                                                    <th style={{ width: '70%' }}>Note</th>
+                                                    <th style={{ width: '10%' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {data.notes.map((note, index) => (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control form-control-sm"
+                                                                value={note.date || ''}
+                                                                onChange={e => updateNote(index, 'date', e.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={note.note || ''}
+                                                                onChange={e => updateNote(index, 'note', e.target.value)}
+                                                                placeholder="Enter note"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                onClick={() => removeNote(index)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="text-muted text-center py-3 border rounded">
+                                        No notes. Click "Add Note" to add one.
+                                    </div>
+                                )}
+                                {errors.notes && (
+                                    <div className="invalid-feedback d-block">
+                                        {errors.notes}
                                     </div>
                                 )}
                             </div>

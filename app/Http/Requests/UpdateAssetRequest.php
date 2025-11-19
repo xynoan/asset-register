@@ -32,6 +32,7 @@ class UpdateAssetRequest extends FormRequest
             'status' => ['required', 'in:In-use,Spare,Under Maintenance,Retired'],
             'maintenance_history' => ['nullable', 'string'],
             'comments_history' => ['nullable', 'string'],
+            'notes' => ['nullable', 'array'],
             'documents' => ['nullable', 'array'],
             'documents.*' => ['file', 'max:10240', 'mimes:pdf,doc,docx,jpg,jpeg,png,txt'],
             'removed_documents' => ['nullable', 'array'],
@@ -85,6 +86,25 @@ class UpdateAssetRequest extends FormRequest
                 ]);
             } elseif ($commentsHistory === '') {
                 $this->merge(['comments_history' => null]);
+            }
+        }
+
+        // Handle notes: convert array to JSON string or null
+        if ($this->has('notes')) {
+            $notes = $this->notes;
+            if (is_array($notes)) {
+                // Filter out empty entries (where all fields are empty)
+                $filtered = array_filter($notes, function($entry) {
+                    return !empty(array_filter($entry));
+                });
+                
+                $this->merge([
+                    'notes' => !empty($filtered) 
+                        ? json_encode(array_values($filtered)) 
+                        : null
+                ]);
+            } elseif ($notes === '') {
+                $this->merge(['notes' => null]);
             }
         }
     }
