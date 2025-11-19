@@ -88,7 +88,7 @@ export default function Create({ employees }) {
     const addNote = () => {
         setData('notes', [
             ...data.notes,
-            { date: '', note: '' }
+            { date: '', note: '', added_by: 'System' }
         ]);
     };
 

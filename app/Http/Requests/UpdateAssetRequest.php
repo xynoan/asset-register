@@ -32,7 +32,7 @@ class UpdateAssetRequest extends FormRequest
             'status' => ['required', 'in:In-use,Spare,Under Maintenance,Retired'],
             'maintenance_history' => ['nullable', 'string'],
             'comments_history' => ['nullable', 'string'],
-            'notes' => ['nullable', 'array'],
+            'notes' => ['nullable', 'string'],
             'documents' => ['nullable', 'array'],
             'documents.*' => ['file', 'max:10240', 'mimes:pdf,doc,docx,jpg,jpeg,png,txt'],
             'removed_documents' => ['nullable', 'array'],

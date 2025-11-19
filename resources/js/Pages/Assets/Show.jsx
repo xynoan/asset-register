@@ -46,9 +46,22 @@ export default function Show({ asset }) {
         return [];
     };
 
+    // Parse notes - handle both string (JSON) and array formats
+    const parseNotes = () => {
+        if (!asset.notes) return [];
+        if (Array.isArray(asset.notes)) return asset.notes;
+        try {
+            const parsed = JSON.parse(asset.notes);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
     const maintenanceHistory = parseMaintenanceHistory();
     const documentPaths = parseDocumentPaths();
     const documentUrls = asset.document_urls || [];
+    const notes = parseNotes();
 
     // Helper function to get file name from path
     const getFileName = (path) => {
@@ -261,6 +274,36 @@ export default function Show({ asset }) {
                                                             </tr>
                                                         );
                                                     })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {notes.length > 0 && (
+                            <div className="row">
+                                <div className="col-12">
+                                    <div className="mb-3">
+                                        <label className="form-label fw-bold">Notes:</label>
+                                        <div className="table-responsive">
+                                            <table className="table table-bordered table-sm">
+                                                <thead className="table-light">
+                                                    <tr>
+                                                        <th style={{ width: '15%' }}>Date</th>
+                                                        <th style={{ width: '60%' }}>Note</th>
+                                                        <th style={{ width: '25%' }}>Added By</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {notes.map((note, index) => (
+                                                        <tr key={index}>
+                                                            <td>{note.date ? moment(note.date).format('DD/MM/YYYY') : 'N/A'}</td>
+                                                            <td>{note.note || 'N/A'}</td>
+                                                            <td>{note.added_by || 'System'}</td>
+                                                        </tr>
+                                                    ))}
                                                 </tbody>
                                             </table>
                                         </div>

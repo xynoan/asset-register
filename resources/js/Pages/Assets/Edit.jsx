@@ -38,13 +38,22 @@ export default function Edit({ asset, employees }) {
     // Parse notes - handle both string (JSON) and array formats
     const parseNotes = () => {
         if (!asset.notes) return [];
-        if (Array.isArray(asset.notes)) return asset.notes;
-        try {
-            const parsed = JSON.parse(asset.notes);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-            return [];
+        let notesArray;
+        if (Array.isArray(asset.notes)) {
+            notesArray = asset.notes;
+        } else {
+            try {
+                const parsed = JSON.parse(asset.notes);
+                notesArray = Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
         }
+        // Ensure all notes have added_by field, defaulting to 'System' if missing
+        return notesArray.map(note => ({
+            ...note,
+            added_by: note.added_by || 'System'
+        }));
     };
 
     const initialNotes = parseNotes();
@@ -132,7 +141,7 @@ export default function Edit({ asset, employees }) {
     const addNote = () => {
         setData('notes', [
             ...data.notes,
-            { date: '', note: '' }
+            { date: '', note: '', added_by: 'System' }
         ]);
     };
 
