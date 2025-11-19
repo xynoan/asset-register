@@ -107,7 +107,7 @@ class Asset extends Model
             return null;
         }
 
-        return now()->diffInDays($this->status_changed_at);
+        return abs(now()->diffInDays($this->status_changed_at));
     }
 
     /**
