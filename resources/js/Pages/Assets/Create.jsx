@@ -285,7 +285,6 @@ export default function Create({ employees }) {
                                             id="asset_category"
                                             value={data.asset_category}
                                             onChange={e => setData('asset_category', e.target.value)}
-                                            required
                                             disabled={loading}
                                         >
                                             <option value="">Select Category</option>
@@ -358,7 +357,6 @@ export default function Create({ employees }) {
                                             id="brand_manufacturer"
                                             value={data.brand_manufacturer}
                                             onChange={e => setData('brand_manufacturer', e.target.value)}
-                                            required
                                             disabled={loading}
                                         >
                                             <option value="">Select Brand / Manufacturer</option>
@@ -406,7 +404,6 @@ export default function Create({ employees }) {
                                             id="model_number"
                                             value={data.model_number}
                                             onChange={e => setData('model_number', e.target.value)}
-                                            required
                                         />
                                         {errors.model_number && (
                                             <div className="invalid-feedback">
@@ -424,7 +421,6 @@ export default function Create({ employees }) {
                                             id="serial_number"
                                             value={data.serial_number}
                                             onChange={e => setData('serial_number', e.target.value)}
-                                            required
                                         />
                                         {errors.serial_number && (
                                             <div className="invalid-feedback">
@@ -445,7 +441,6 @@ export default function Create({ employees }) {
                                             id="purchase_date"
                                             value={data.purchase_date}
                                             onChange={e => setData('purchase_date', e.target.value)}
-                                            required
                                         />
                                         {errors.purchase_date && (
                                             <div className="invalid-feedback">
@@ -554,7 +549,6 @@ export default function Create({ employees }) {
                                             id="status"
                                             value={data.status}
                                             onChange={e => setData('status', e.target.value)}
-                                            required
                                         >
                                             {statusOptions.map(status => (
                                                 <option key={status} value={status}>{status}</option>
