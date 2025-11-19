@@ -313,8 +313,7 @@ export default function Edit({ asset, employees }) {
 
                 <div className="card">
                     <div className="card-header">
-                        <h5 className="card-title mb-0">Update Asset Information</h5>
-                        <small className="text-muted">Asset ID: {asset.asset_id}</small>
+                        <h5 className="card-title mb-0">Asset ID: {asset.asset_id}</h5>
                     </div>
                     <div className="card-body">
                         <form onSubmit={handleSubmit}>
