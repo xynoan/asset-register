@@ -46,6 +46,18 @@ export default function Show({ asset }) {
         return [];
     };
 
+    // Parse comments_history - handle both string (JSON) and array formats
+    const parseCommentsHistory = () => {
+        if (!asset.comments_history) return [];
+        if (Array.isArray(asset.comments_history)) return asset.comments_history;
+        try {
+            const parsed = JSON.parse(asset.comments_history);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
     // Parse notes - handle both string (JSON) and array formats
     const parseNotes = () => {
         if (!asset.notes) return [];
@@ -61,6 +73,7 @@ export default function Show({ asset }) {
     const maintenanceHistory = parseMaintenanceHistory();
     const documentPaths = parseDocumentPaths();
     const documentUrls = asset.document_urls || [];
+    const commentsHistory = parseCommentsHistory();
     const notes = parseNotes();
 
     // Helper function to get file name from path
@@ -274,6 +287,36 @@ export default function Show({ asset }) {
                                                             </tr>
                                                         );
                                                     })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {commentsHistory.length > 0 && (
+                            <div className="row">
+                                <div className="col-12">
+                                    <div className="mb-3">
+                                        <label className="form-label fw-bold">Comments History:</label>
+                                        <div className="table-responsive">
+                                            <table className="table table-bordered table-sm">
+                                                <thead className="table-light">
+                                                    <tr>
+                                                        <th style={{ width: '15%' }}>Date</th>
+                                                        <th style={{ width: '60%' }}>Comment</th>
+                                                        <th style={{ width: '25%' }}>Added By</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {commentsHistory.map((comment, index) => (
+                                                        <tr key={index}>
+                                                            <td>{comment.date ? moment(comment.date).format('DD/MM/YYYY') : 'N/A'}</td>
+                                                            <td>{comment.comment || 'N/A'}</td>
+                                                            <td>{comment.added_by || 'System'}</td>
+                                                        </tr>
+                                                    ))}
                                                 </tbody>
                                             </table>
                                         </div>

@@ -58,6 +58,45 @@ export default function Edit({ asset, employees }) {
 
     const initialNotes = parseNotes();
 
+    // Parse comments_history - handle both string (JSON) and array formats
+    const parseCommentsHistory = () => {
+        if (!asset.comments_history) return [];
+        let commentsArray;
+        if (Array.isArray(asset.comments_history)) {
+            commentsArray = asset.comments_history;
+        } else {
+            try {
+                const parsed = JSON.parse(asset.comments_history);
+                commentsArray = Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
+        }
+        // Ensure all comments have added_by field, defaulting to 'System' if missing
+        // Format date to YYYY-MM-DD for HTML date input if it exists
+        return commentsArray.map(comment => {
+            let formattedDate = comment.date || '';
+            if (formattedDate && formattedDate !== '') {
+                // If date is in a different format, try to format it
+                try {
+                    const dateObj = moment(formattedDate);
+                    if (dateObj.isValid()) {
+                        formattedDate = dateObj.format('YYYY-MM-DD');
+                    }
+                } catch (e) {
+                    // Keep original format if parsing fails
+                }
+            }
+            return {
+                ...comment,
+                date: formattedDate,
+                added_by: comment.added_by || 'System'
+            };
+        });
+    };
+
+    const initialCommentsHistory = parseCommentsHistory();
+
     const fetchLookups = () => {
         setLoading(true);
         Promise.all([
@@ -88,6 +127,7 @@ export default function Edit({ asset, employees }) {
         warranty_expiry_date: asset.warranty_expiry_date ? moment(asset.warranty_expiry_date).format('YYYY-MM-DD') : '',
         status: asset.status || 'Spare',
         maintenance_history: initialMaintenanceHistory,
+        comments_history: initialCommentsHistory,
         notes: initialNotes,
         documents: [],
         removed_documents: [],
@@ -155,6 +195,26 @@ export default function Edit({ asset, employees }) {
         const updated = [...data.notes];
         updated[index] = { ...updated[index], [field]: value };
         setData('notes', updated);
+    };
+
+    const addComment = () => {
+        const addedBy = auth?.user?.name || 'System';
+        setData('comments_history', [
+            ...data.comments_history,
+            { date: '', comment: '', added_by: addedBy }
+        ]);
+    };
+
+    const removeComment = (index) => {
+        setData('comments_history', 
+            data.comments_history.filter((_, i) => i !== index)
+        );
+    };
+
+    const updateComment = (index, field, value) => {
+        const updated = [...data.comments_history];
+        updated[index] = { ...updated[index], [field]: value };
+        setData('comments_history', updated);
     };
 
     const handleDocumentChange = (e) => {
@@ -796,6 +856,84 @@ export default function Edit({ asset, employees }) {
                                 {errors.maintenance_history && (
                                     <div className="invalid-feedback d-block">
                                         {errors.maintenance_history}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3">
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <label htmlFor="comments_history" className="form-label mb-0">Comments History</label>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={addComment}
+                                    >
+                                        + Add Comment
+                                    </button>
+                                </div>
+                                {data.comments_history.length > 0 ? (
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered table-sm">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th style={{ width: '20%' }}>Date</th>
+                                                    <th style={{ width: '60%' }}>Comment</th>
+                                                    <th style={{ width: '20%' }}>Added By</th>
+                                                    <th style={{ width: '10%' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {data.comments_history.map((comment, index) => (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control form-control-sm"
+                                                                value={comment.date || ''}
+                                                                onChange={e => updateComment(index, 'date', e.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={comment.comment || ''}
+                                                                onChange={e => updateComment(index, 'comment', e.target.value)}
+                                                                placeholder="Enter comment"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={comment.added_by || ''}
+                                                                readOnly
+                                                                disabled
+                                                                style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                onClick={() => removeComment(index)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="text-muted text-center py-3 border rounded">
+                                        No comments. Click "Add Comment" to add one.
+                                    </div>
+                                )}
+                                {errors.comments_history && (
+                                    <div className="invalid-feedback d-block">
+                                        {errors.comments_history}
                                     </div>
                                 )}
                             </div>

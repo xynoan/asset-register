@@ -49,6 +49,7 @@ export default function Create({ employees }) {
         warranty_expiry_date: '',
         status: 'Spare',
         maintenance_history: [],
+        comments_history: [],
         notes: [],
         documents: [],
         assigned_to: '',
@@ -102,6 +103,26 @@ export default function Create({ employees }) {
         const updated = [...data.notes];
         updated[index] = { ...updated[index], [field]: value };
         setData('notes', updated);
+    };
+
+    const addComment = () => {
+        const addedBy = auth?.user?.name || 'System';
+        setData('comments_history', [
+            ...data.comments_history,
+            { date: '', comment: '', added_by: addedBy }
+        ]);
+    };
+
+    const removeComment = (index) => {
+        setData('comments_history', 
+            data.comments_history.filter((_, i) => i !== index)
+        );
+    };
+
+    const updateComment = (index, field, value) => {
+        const updated = [...data.comments_history];
+        updated[index] = { ...updated[index], [field]: value };
+        setData('comments_history', updated);
     };
 
     const handleDocumentChange = (e) => {
@@ -697,6 +718,84 @@ export default function Create({ employees }) {
                                 {errors.maintenance_history && (
                                     <div className="invalid-feedback d-block">
                                         {errors.maintenance_history}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3">
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                    <label htmlFor="comments_history" className="form-label mb-0">Comments History</label>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={addComment}
+                                    >
+                                        + Add Comment
+                                    </button>
+                                </div>
+                                {data.comments_history.length > 0 ? (
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered table-sm">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th style={{ width: '20%' }}>Date</th>
+                                                    <th style={{ width: '60%' }}>Comment</th>
+                                                    <th style={{ width: '20%' }}>Added By</th>
+                                                    <th style={{ width: '10%' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {data.comments_history.map((comment, index) => (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control form-control-sm"
+                                                                value={comment.date || ''}
+                                                                onChange={e => updateComment(index, 'date', e.target.value)}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={comment.comment || ''}
+                                                                onChange={e => updateComment(index, 'comment', e.target.value)}
+                                                                placeholder="Enter comment"
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                type="text"
+                                                                className="form-control form-control-sm"
+                                                                value={comment.added_by || ''}
+                                                                readOnly
+                                                                disabled
+                                                                style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                onClick={() => removeComment(index)}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="text-muted text-center py-3 border rounded">
+                                        No comments. Click "Add Comment" to add one.
+                                    </div>
+                                )}
+                                {errors.comments_history && (
+                                    <div className="invalid-feedback d-block">
+                                        {errors.comments_history}
                                     </div>
                                 )}
                             </div>
