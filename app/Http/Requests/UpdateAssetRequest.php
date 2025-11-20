@@ -24,8 +24,8 @@ class UpdateAssetRequest extends FormRequest
         return [
             'asset_category' => ['required', 'string', 'max:255'],
             'brand_manufacturer' => ['required', 'string', 'max:255'],
-            'model_number' => ['required', 'string', 'max:255'],
-            'serial_number' => ['required', 'string', 'max:255'],
+            'model_number' => ['required', 'integer'],
+            'serial_number' => ['required', 'integer'],
             'purchase_date' => ['required', 'date'],
             'vendor_supplier' => ['nullable', 'string', 'max:255'],
             'warranty_expiry_date' => ['nullable', 'date', 'after:purchase_date'],
