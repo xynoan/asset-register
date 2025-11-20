@@ -63,7 +63,7 @@ class LookupController extends Controller
     public function storeCategory(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255', 'unique:asset_categories,name']
+            'name' => ['required', 'string', 'max:255', 'unique:asset_categories,name,NULL,id,is_active,1']
         ]);
 
         if ($validator->fails()) {
@@ -91,7 +91,7 @@ class LookupController extends Controller
     public function storeBrand(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255', 'unique:brands_manufacturers,name']
+            'name' => ['required', 'string', 'max:255', 'unique:brands_manufacturers,name,NULL,id,is_active,1']
         ]);
 
         if ($validator->fails()) {
@@ -119,7 +119,7 @@ class LookupController extends Controller
     public function storeSupplier(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255', 'unique:suppliers,name']
+            'name' => ['required', 'string', 'max:255', 'unique:suppliers,name,NULL,id,is_active,1']
         ]);
 
         if ($validator->fails()) {
