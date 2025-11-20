@@ -529,13 +529,13 @@ export default function Edit({ asset, employees }) {
                                                 {categories.length > 0 && (
                                                     <button
                                                         type="button"
-                                                        className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                        className="btn btn-sm btn-link p-0 text-decoration-none text-danger"
                                                         onClick={() => {
                                                             setShowRemoveCategory(!showRemoveCategory);
                                                             setShowAddCategory(false);
                                                         }}
                                                     >
-                                                        {showRemoveCategory ? 'Cancel' : 'Remove'}
+                                                        {showRemoveCategory ? 'Cancel' : '- Remove'}
                                                     </button>
                                                 )}
                                             </div>
@@ -624,13 +624,13 @@ export default function Edit({ asset, employees }) {
                                                 {brands.length > 0 && (
                                                     <button
                                                         type="button"
-                                                        className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                        className="btn btn-sm btn-link p-0 text-decoration-none text-danger"
                                                         onClick={() => {
                                                             setShowRemoveBrand(!showRemoveBrand);
                                                             setShowAddBrand(false);
                                                         }}
                                                     >
-                                                        {showRemoveBrand ? 'Cancel' : 'Remove'}
+                                                        {showRemoveBrand ? 'Cancel' : '- Remove'}
                                                     </button>
                                                 )}
                                             </div>
@@ -779,13 +779,13 @@ export default function Edit({ asset, employees }) {
                                                 {suppliers.length > 0 && (
                                                     <button
                                                         type="button"
-                                                        className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                        className="btn btn-sm btn-link p-0 text-decoration-none text-danger"
                                                         onClick={() => {
                                                             setShowRemoveSupplier(!showRemoveSupplier);
                                                             setShowAddSupplier(false);
                                                         }}
                                                     >
-                                                        {showRemoveSupplier ? 'Cancel' : 'Remove'}
+                                                        {showRemoveSupplier ? 'Cancel' : '- Remove'}
                                                     </button>
                                                 )}
                                             </div>
