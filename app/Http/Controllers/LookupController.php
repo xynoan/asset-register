@@ -13,12 +13,11 @@ use Illuminate\Support\Facades\Validator;
 class LookupController extends Controller
 {
     /**
-     * Get all active asset categories.
+     * Get all asset categories.
      */
     public function categories(): JsonResponse
     {
-        $categories = AssetCategory::where('is_active', true)
-            ->orderBy('name')
+        $categories = AssetCategory::orderBy('name')
             ->get();
 
         return response()->json([
@@ -28,12 +27,11 @@ class LookupController extends Controller
     }
 
     /**
-     * Get all active brands/manufacturers.
+     * Get all brands/manufacturers.
      */
     public function brands(): JsonResponse
     {
-        $brands = BrandManufacturer::where('is_active', true)
-            ->orderBy('name')
+        $brands = BrandManufacturer::orderBy('name')
             ->get();
 
         return response()->json([
@@ -43,12 +41,11 @@ class LookupController extends Controller
     }
 
     /**
-     * Get all active suppliers.
+     * Get all suppliers.
      */
     public function suppliers(): JsonResponse
     {
-        $suppliers = Supplier::where('is_active', true)
-            ->orderBy('name')
+        $suppliers = Supplier::orderBy('name')
             ->get();
 
         return response()->json([
@@ -63,7 +60,12 @@ class LookupController extends Controller
     public function storeCategory(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255', 'unique:asset_categories,name,NULL,id,is_active,1']
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:asset_categories,name'
+            ]
         ]);
 
         if ($validator->fails()) {
@@ -74,8 +76,7 @@ class LookupController extends Controller
         }
 
         $category = AssetCategory::create([
-            'name' => $request->name,
-            'is_active' => true
+            'name' => $request->name
         ]);
 
         return response()->json([
@@ -91,7 +92,12 @@ class LookupController extends Controller
     public function storeBrand(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255', 'unique:brands_manufacturers,name,NULL,id,is_active,1']
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:brands_manufacturers,name'
+            ]
         ]);
 
         if ($validator->fails()) {
@@ -102,8 +108,7 @@ class LookupController extends Controller
         }
 
         $brand = BrandManufacturer::create([
-            'name' => $request->name,
-            'is_active' => true
+            'name' => $request->name
         ]);
 
         return response()->json([
@@ -119,7 +124,12 @@ class LookupController extends Controller
     public function storeSupplier(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255', 'unique:suppliers,name,NULL,id,is_active,1']
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:suppliers,name'
+            ]
         ]);
 
         if ($validator->fails()) {
@@ -130,8 +140,7 @@ class LookupController extends Controller
         }
 
         $supplier = Supplier::create([
-            'name' => $request->name,
-            'is_active' => true
+            'name' => $request->name
         ]);
 
         return response()->json([
@@ -142,7 +151,7 @@ class LookupController extends Controller
     }
 
     /**
-     * Delete an asset category (soft delete by setting is_active to false).
+     * Delete an asset category (hard delete).
      */
     public function deleteCategory($id): JsonResponse
     {
@@ -158,7 +167,7 @@ class LookupController extends Controller
             ], 422);
         }
 
-        $category->update(['is_active' => false]);
+        $category->delete();
 
         return response()->json([
             'success' => true,
@@ -167,7 +176,7 @@ class LookupController extends Controller
     }
 
     /**
-     * Delete a brand/manufacturer (soft delete by setting is_active to false).
+     * Delete a brand/manufacturer (hard delete).
      */
     public function deleteBrand($id): JsonResponse
     {
@@ -183,7 +192,7 @@ class LookupController extends Controller
             ], 422);
         }
 
-        $brand->update(['is_active' => false]);
+        $brand->delete();
 
         return response()->json([
             'success' => true,
@@ -192,7 +201,7 @@ class LookupController extends Controller
     }
 
     /**
-     * Delete a supplier (soft delete by setting is_active to false).
+     * Delete a supplier (hard delete).
      */
     public function deleteSupplier($id): JsonResponse
     {
@@ -208,7 +217,7 @@ class LookupController extends Controller
             ], 422);
         }
 
-        $supplier->update(['is_active' => false]);
+        $supplier->delete();
 
         return response()->json([
             'success' => true,

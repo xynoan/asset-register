@@ -204,8 +204,11 @@ export default function Create({ employees }) {
         } catch (error) {
             if (error.response?.data?.errors?.name) {
                 alert(error.response.data.errors.name[0]);
+            } else if (error.response?.data?.message) {
+                alert(error.response.data.message);
             } else {
-                alert('Failed to add category');
+                console.error('Error adding category:', error);
+                alert('Failed to add category: ' + (error.message || 'Unknown error'));
             }
         } finally {
             setAddingCategory(false);
