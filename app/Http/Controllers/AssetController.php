@@ -104,6 +104,38 @@ class AssetController extends Controller
             }
         }
 
+        // Prepare initial modification history entry for asset creation
+        $user = Auth::user();
+        $modifiedByName = $user ? $user->name : 'System';
+        $docCount = count($documentPaths);
+        
+        $initialChanges = [
+            ['field' => 'asset_category', 'old_value' => null, 'new_value' => $validated['asset_category']],
+            ['field' => 'brand_manufacturer', 'old_value' => null, 'new_value' => $validated['brand_manufacturer']],
+            ['field' => 'model_number', 'old_value' => null, 'new_value' => $validated['model_number']],
+            ['field' => 'serial_number', 'old_value' => null, 'new_value' => $validated['serial_number']],
+            ['field' => 'purchase_date', 'old_value' => null, 'new_value' => $validated['purchase_date']],
+            ['field' => 'status', 'old_value' => null, 'new_value' => $validated['status']],
+        ];
+        
+        if (!empty($validated['vendor_supplier'])) {
+            $initialChanges[] = ['field' => 'vendor_supplier', 'old_value' => null, 'new_value' => $validated['vendor_supplier']];
+        }
+        
+        if (!empty($validated['warranty_expiry_date'])) {
+            $initialChanges[] = ['field' => 'warranty_expiry_date', 'old_value' => null, 'new_value' => $validated['warranty_expiry_date']];
+        }
+        
+        if ($assignedTo) {
+            $employee = Employee::find($assignedTo);
+            $employeeNo = $employee ? $employee->employee_no : $assignedTo;
+            $initialChanges[] = ['field' => 'assigned_to', 'old_value' => null, 'new_value' => $employeeNo];
+        }
+        
+        if ($docCount > 0) {
+            $initialChanges[] = ['field' => 'documents', 'old_value' => null, 'new_value' => $docCount . ' document(s)'];
+        }
+
         $asset = Asset::create([
             'asset_id' => $assetId,
             'asset_category' => $validated['asset_category'],
@@ -122,6 +154,13 @@ class AssetController extends Controller
             'created_by' => $userId,
             'updated_by' => $userId,
             'status_changed_at' => now(),
+            'modification_history' => [[
+                'timestamp' => now()->toDateTimeString(),
+                'date' => now()->format('Y-m-d'),
+                'modified_by_id' => $userId,
+                'modified_by' => $modifiedByName,
+                'changes' => $initialChanges,
+            ]],
         ]);
 
         // Record initial status in status history
@@ -273,6 +312,72 @@ class AssetController extends Controller
             $asset->recordStatusChange($newStatus, $userId);
         }
         
+        // Track field changes for modification history
+        $changes = [];
+        $fieldsToTrack = [
+            'asset_category',
+            'brand_manufacturer',
+            'model_number',
+            'serial_number',
+            'purchase_date',
+            'vendor_supplier',
+            'warranty_expiry_date',
+            'status',
+            'assigned_to',
+        ];
+
+        foreach ($fieldsToTrack as $field) {
+            $oldValue = $asset->getOriginal($field);
+            $newValue = null;
+
+            if ($field === 'assigned_to') {
+                $newValue = $assignedTo;
+                // Format employee info for display
+                if ($oldValue) {
+                    $oldEmployee = Employee::find($oldValue);
+                    $oldValue = $oldEmployee ? $oldEmployee->employee_no : $oldValue;
+                }
+                if ($newValue) {
+                    $newEmployee = Employee::find($newValue);
+                    $newValue = $newEmployee ? $newEmployee->employee_no : $newValue;
+                }
+            } elseif ($field === 'purchase_date' || $field === 'warranty_expiry_date') {
+                $newValue = !empty($validated[$field]) ? $validated[$field] : null;
+                // Format dates for display
+                if ($oldValue) {
+                    $oldValue = is_string($oldValue) ? $oldValue : $oldValue->format('Y-m-d');
+                }
+                if ($newValue) {
+                    $newValue = is_string($newValue) ? $newValue : (is_object($newValue) ? $newValue->format('Y-m-d') : $newValue);
+                }
+            } else {
+                $newValue = isset($validated[$field]) ? $validated[$field] : null;
+            }
+
+            // Normalize null/empty values for comparison
+            $oldValueNormalized = $oldValue === null || $oldValue === '' ? null : $oldValue;
+            $newValueNormalized = $newValue === null || $newValue === '' ? null : $newValue;
+
+            if ($oldValueNormalized != $newValueNormalized) {
+                $changes[] = [
+                    'field' => $field,
+                    'old_value' => $oldValueNormalized,
+                    'new_value' => $newValueNormalized,
+                ];
+            }
+        }
+
+        // Track document changes
+        $oldDocCount = is_array($asset->document_paths) ? count($asset->document_paths) : 0;
+        $newDocCount = is_array($documentPaths) ? count($documentPaths) : 0;
+        if ($oldDocCount != $newDocCount) {
+            $changes[] = [
+                'field' => 'documents',
+                'old_value' => $oldDocCount . ' document(s)',
+                'new_value' => $newDocCount . ' document(s)',
+            ];
+        }
+        
         $updateData = [
             'asset_category' => $validated['asset_category'],
             'brand_manufacturer' => $validated['brand_manufacturer'],
@@ -294,6 +399,23 @@ class AssetController extends Controller
         if ($oldStatus !== $newStatus) {
             $updateData['status_history'] = $asset->status_history;
             $updateData['status_changed_at'] = $asset->status_changed_at;
+        }
+
+        // Record modification history if there are changes
+        if (!empty($changes)) {
+            $modificationHistory = $asset->modification_history ?? [];
+            $user = Auth::user();
+            $modifiedByName = $user ? $user->name : 'System';
+            
+            $modificationHistory[] = [
+                'timestamp' => now()->toDateTimeString(),
+                'date' => now()->format('Y-m-d'),
+                'modified_by_id' => $userId,
+                'modified_by' => $modifiedByName,
+                'changes' => $changes,
+            ];
+            
+            $updateData['modification_history'] = $modificationHistory;
         }
 
         $asset->update($updateData);

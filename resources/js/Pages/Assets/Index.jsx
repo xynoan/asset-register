@@ -103,6 +103,7 @@ export default function Index({ assets, flash }) {
                                     <th>Assigned To</th>
                                     <th>Purchase Date</th>
                                     <th>Status Duration</th>
+                                    <th>Last Modified</th>
                                     <th>Attachments</th>
                                     <th>Actions</th>
                                 </tr>
@@ -151,6 +152,19 @@ export default function Index({ assets, flash }) {
                                                 </small>
                                             </td>
                                             <td>
+                                                <small className="text-muted">
+                                                    {asset.updated_at ? moment(asset.updated_at).format('DD/MM/YYYY HH:mm') : 'N/A'}
+                                                    {asset.updater && (
+                                                        <>
+                                                            <br />
+                                                            <span className="text-muted" style={{ fontSize: '0.85em' }}>
+                                                                by {asset.updater.name || 'System'}
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </small>
+                                            </td>
+                                            <td>
                                                 {asset.document_count > 0 ? (
                                                     <Link
                                                         href={route('assets.show', asset.id)}
@@ -187,7 +201,7 @@ export default function Index({ assets, flash }) {
                                         </tr>
                                         {expandedRows[asset.id] && (
                                             <tr key={`${asset.id}-comment`}>
-                                                <td colSpan="12" className="bg-light">
+                                                <td colSpan="13" className="bg-light">
                                                     <div className="p-3">
                                                         {/* Parse and display existing comments */}
                                                         {(() => {

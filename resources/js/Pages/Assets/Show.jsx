@@ -70,11 +70,24 @@ export default function Show({ asset }) {
         }
     };
 
+    // Parse modification_history - handle both string (JSON) and array formats
+    const parseModificationHistory = () => {
+        if (!asset.modification_history) return [];
+        if (Array.isArray(asset.modification_history)) return asset.modification_history;
+        try {
+            const parsed = JSON.parse(asset.modification_history);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
     const maintenanceHistory = parseMaintenanceHistory();
     const documentPaths = parseDocumentPaths();
     const documentUrls = asset.document_urls || [];
     const commentsHistory = parseCommentsHistory();
     const notes = parseNotes();
+    const modificationHistory = parseModificationHistory();
 
     // Helper function to get file name from path
     const getFileName = (path) => {
@@ -345,6 +358,58 @@ export default function Show({ asset }) {
                                                             <td>{note.date ? moment(note.date).format('DD/MM/YYYY') : 'N/A'}</td>
                                                             <td>{note.note || 'N/A'}</td>
                                                             <td>{note.added_by || 'System'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {modificationHistory.length > 0 && (
+                            <div className="row">
+                                <div className="col-12">
+                                    <div className="mb-3">
+                                        <label className="form-label fw-bold">Modification History:</label>
+                                        <div className="table-responsive">
+                                            <table className="table table-bordered table-sm">
+                                                <thead className="table-light">
+                                                    <tr>
+                                                        <th style={{ width: '15%' }}>Date & Time</th>
+                                                        <th style={{ width: '20%' }}>Modified By</th>
+                                                        <th style={{ width: '65%' }}>Changes</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {modificationHistory.map((entry, index) => (
+                                                        <tr key={index}>
+                                                            <td>
+                                                                {entry.timestamp ? moment(entry.timestamp).format('DD/MM/YYYY HH:mm') : 
+                                                                 entry.date ? moment(entry.date).format('DD/MM/YYYY') : 'N/A'}
+                                                            </td>
+                                                            <td>{entry.modified_by || 'System'}</td>
+                                                            <td>
+                                                                {entry.changes && Array.isArray(entry.changes) && entry.changes.length > 0 ? (
+                                                                    <ul className="mb-0" style={{ paddingLeft: '20px' }}>
+                                                                        {entry.changes.map((change, changeIndex) => (
+                                                                            <li key={changeIndex} style={{ marginBottom: '4px' }}>
+                                                                                <strong>{change.field}:</strong>{' '}
+                                                                                <span className="text-danger">
+                                                                                    {change.old_value === null ? '(empty)' : String(change.old_value)}
+                                                                                </span>
+                                                                                {' → '}
+                                                                                <span className="text-success">
+                                                                                    {change.new_value === null ? '(empty)' : String(change.new_value)}
+                                                                                </span>
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                ) : (
+                                                                    <span className="text-muted">No changes recorded</span>
+                                                                )}
+                                                            </td>
                                                         </tr>
                                                     ))}
                                                 </tbody>
