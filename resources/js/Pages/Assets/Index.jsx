@@ -31,7 +31,6 @@ export default function Index({ assets, flash }) {
             onFinish: () => {
                 setSubmitting(prev => ({ ...prev, [assetId]: false }));
                 setCommentInputs(prev => ({ ...prev, [assetId]: '' }));
-                setExpandedRows(prev => ({ ...prev, [assetId]: false }));
             },
         });
     };
@@ -218,7 +217,9 @@ export default function Index({ assets, flash }) {
                                                                     }
                                                                 }
                                                             }
-                                                            return commentsHistory.length > 0 ? (
+                                                            // Reverse to show newest comments first
+                                                            const reversedComments = [...commentsHistory].reverse();
+                                                            return reversedComments.length > 0 ? (
                                                                 <div className="mb-3">
                                                                     <h6 className="mb-2">Comments</h6>
                                                                     <div className="table-responsive">
@@ -231,7 +232,7 @@ export default function Index({ assets, flash }) {
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
-                                                                                {commentsHistory.map((entry, index) => (
+                                                                                {reversedComments.map((entry, index) => (
                                                                                     <tr key={index}>
                                                                                         <td>{entry.date ? moment(entry.date).format('DD/MM/YYYY') : 'N/A'}</td>
                                                                                         <td>{entry.comment || 'N/A'}</td>
