@@ -32,7 +32,11 @@ class StoreAssetRequest extends FormRequest
             'vendor_supplier' => ['nullable', 'string', 'max:255'],
             'warranty_expiry_date' => ['nullable', 'date', 'after:purchase_date'],
             'status' => ['required', 'in:In-use,Spare,Under Maintenance,Retired'],
-            'maintenance_history' => ['nullable', 'string'],
+            'maintenance_history' => ['nullable', 'array'],
+            'maintenance_history.*.date' => ['nullable', 'date'],
+            'maintenance_history.*.description' => ['nullable', 'string', 'max:1000'],
+            'maintenance_history.*.cost' => ['nullable', 'regex:/^-?\d+$/'],
+            'maintenance_history.*.performed_by' => ['nullable', 'exists:tbl_employees,id'],
             'comments_history' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
             'documents' => ['nullable', 'array'],
@@ -55,16 +59,30 @@ class StoreAssetRequest extends FormRequest
         if ($this->has('maintenance_history')) {
             $maintenanceHistory = $this->maintenance_history;
             if (is_array($maintenanceHistory)) {
-                // Filter out empty entries (where all fields are empty)
-                $filtered = array_filter($maintenanceHistory, function($entry) {
-                    return !empty(array_filter($entry));
-                });
+                // Normalize the data before validation
+                $normalized = [];
+                foreach ($maintenanceHistory as $entry) {
+                    // Convert empty strings to null for nullable fields
+                    $normalizedEntry = [];
+                    $normalizedEntry['date'] = isset($entry['date']) && $entry['date'] !== '' ? $entry['date'] : null;
+                    $normalizedEntry['description'] = isset($entry['description']) && $entry['description'] !== '' ? $entry['description'] : null;
+                    $normalizedEntry['cost'] = isset($entry['cost']) && $entry['cost'] !== '' ? $entry['cost'] : null;
+                    $normalizedEntry['performed_by'] = isset($entry['performed_by']) && $entry['performed_by'] !== '' ? $entry['performed_by'] : null;
+                    
+                    // Only add entry if at least one field has a value
+                    if (!empty(array_filter($normalizedEntry, function($value) {
+                        return $value !== null && $value !== '';
+                    }))) {
+                        $normalized[] = $normalizedEntry;
+                    }
+                }
                 
-                $this->merge([
-                    'maintenance_history' => !empty($filtered) 
-                        ? json_encode(array_values($filtered)) 
-                        : null
-                ]);
+                // Merge normalized array back for validation
+                if (!empty($normalized)) {
+                    $this->merge(['maintenance_history' => array_values($normalized)]);
+                } else {
+                    $this->merge(['maintenance_history' => null]);
+                }
             } elseif ($maintenanceHistory === '') {
                 $this->merge(['maintenance_history' => null]);
             }
@@ -110,6 +128,23 @@ class StoreAssetRequest extends FormRequest
     }
 
     /**
+     * Handle a passed validation attempt.
+     * Convert validated array data to JSON strings for storage.
+     */
+    protected function passedValidation(): void
+    {
+        // Convert maintenance_history array to JSON string after validation
+        if ($this->has('maintenance_history') && is_array($this->maintenance_history)) {
+            $maintenanceHistory = $this->maintenance_history;
+            $this->merge([
+                'maintenance_history' => !empty($maintenanceHistory) 
+                    ? json_encode(array_values($maintenanceHistory)) 
+                    : null
+            ]);
+        }
+    }
+
+    /**
      * Get custom attributes for validator errors.
      *
      * @return array<string, string>
@@ -125,6 +160,7 @@ class StoreAssetRequest extends FormRequest
             'vendor_supplier' => 'vendor / supplier',
             'warranty_expiry_date' => 'warranty expiry date',
             'assigned_to' => 'assigned to',
+            'maintenance_history.*.cost' => 'maintenance cost',
         ];
     }
 

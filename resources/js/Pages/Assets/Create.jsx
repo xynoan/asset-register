@@ -60,6 +60,13 @@ export default function Create({ employees }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        // Check if there are any maintenance entry validation errors
+        if (Object.keys(maintenanceErrors).length > 0) {
+            alert('Please fix the validation errors in the maintenance history before submitting.');
+            return;
+        }
+        
         post(route('assets.store'), {
             onSuccess: () => {
                 window.location.href = route('assets.index');

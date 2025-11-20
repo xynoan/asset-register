@@ -139,6 +139,13 @@ export default function Edit({ asset, employees }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        
+        // Check if there are any maintenance entry validation errors
+        if (Object.keys(maintenanceErrors).length > 0) {
+            alert('Please fix the validation errors in the maintenance history before submitting.');
+            return;
+        }
+        
         // When files are present or documents are removed, use POST route to avoid method spoofing issues
         // When no files, use PUT for cleaner semantics
         if (data.documents.length > 0 || data.removed_documents.length > 0) {
