@@ -21,6 +21,17 @@ export default function Edit({ asset, employees }) {
     const [addingBrand, setAddingBrand] = useState(false);
     const [addingSupplier, setAddingSupplier] = useState(false);
 
+    // States for removing values
+    const [showRemoveCategory, setShowRemoveCategory] = useState(false);
+    const [showRemoveBrand, setShowRemoveBrand] = useState(false);
+    const [showRemoveSupplier, setShowRemoveSupplier] = useState(false);
+    const [selectedCategoryToDelete, setSelectedCategoryToDelete] = useState('');
+    const [selectedBrandToDelete, setSelectedBrandToDelete] = useState('');
+    const [selectedSupplierToDelete, setSelectedSupplierToDelete] = useState('');
+    const [deletingCategory, setDeletingCategory] = useState(false);
+    const [deletingBrand, setDeletingBrand] = useState(false);
+    const [deletingSupplier, setDeletingSupplier] = useState(false);
+
     // State for maintenance entry validation errors
     const [maintenanceErrors, setMaintenanceErrors] = useState({});
 
@@ -349,6 +360,7 @@ export default function Edit({ asset, employees }) {
 
     const handleDeleteCategory = async (id, name) => {
         if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+        setDeletingCategory(true);
         try {
             const response = await axios.delete(route('lookups.categories.delete', id));
             if (response.data.success) {
@@ -356,6 +368,8 @@ export default function Edit({ asset, employees }) {
                 if (data.asset_category === name) {
                     setData('asset_category', '');
                 }
+                setSelectedCategoryToDelete('');
+                setShowRemoveCategory(false);
             }
         } catch (error) {
             if (error.response?.data?.message) {
@@ -363,11 +377,22 @@ export default function Edit({ asset, employees }) {
             } else {
                 alert('Failed to delete category');
             }
+        } finally {
+            setDeletingCategory(false);
+        }
+    };
+
+    const handleConfirmDeleteCategory = () => {
+        if (!selectedCategoryToDelete) return;
+        const category = categories.find(cat => cat.id === parseInt(selectedCategoryToDelete));
+        if (category) {
+            handleDeleteCategory(category.id, category.name);
         }
     };
 
     const handleDeleteBrand = async (id, name) => {
         if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+        setDeletingBrand(true);
         try {
             const response = await axios.delete(route('lookups.brands.delete', id));
             if (response.data.success) {
@@ -375,6 +400,8 @@ export default function Edit({ asset, employees }) {
                 if (data.brand_manufacturer === name) {
                     setData('brand_manufacturer', '');
                 }
+                setSelectedBrandToDelete('');
+                setShowRemoveBrand(false);
             }
         } catch (error) {
             if (error.response?.data?.message) {
@@ -382,11 +409,22 @@ export default function Edit({ asset, employees }) {
             } else {
                 alert('Failed to delete brand');
             }
+        } finally {
+            setDeletingBrand(false);
+        }
+    };
+
+    const handleConfirmDeleteBrand = () => {
+        if (!selectedBrandToDelete) return;
+        const brand = brands.find(b => b.id === parseInt(selectedBrandToDelete));
+        if (brand) {
+            handleDeleteBrand(brand.id, brand.name);
         }
     };
 
     const handleDeleteSupplier = async (id, name) => {
         if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+        setDeletingSupplier(true);
         try {
             const response = await axios.delete(route('lookups.suppliers.delete', id));
             if (response.data.success) {
@@ -394,6 +432,8 @@ export default function Edit({ asset, employees }) {
                 if (data.vendor_supplier === name) {
                     setData('vendor_supplier', '');
                 }
+                setSelectedSupplierToDelete('');
+                setShowRemoveSupplier(false);
             }
         } catch (error) {
             if (error.response?.data?.message) {
@@ -401,6 +441,16 @@ export default function Edit({ asset, employees }) {
             } else {
                 alert('Failed to delete supplier');
             }
+        } finally {
+            setDeletingSupplier(false);
+        }
+    };
+
+    const handleConfirmDeleteSupplier = () => {
+        if (!selectedSupplierToDelete) return;
+        const supplier = suppliers.find(s => s.id === parseInt(selectedSupplierToDelete));
+        if (supplier) {
+            handleDeleteSupplier(supplier.id, supplier.name);
         }
     };
 
@@ -465,13 +515,30 @@ export default function Edit({ asset, employees }) {
                                     <div className="mb-3">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
                                             <label htmlFor="asset_category" className="form-label mb-0">Asset Category *</label>
-                                            <button
-                                                type="button"
-                                                className="btn btn-sm btn-link p-0 text-decoration-none"
-                                                onClick={() => setShowAddCategory(!showAddCategory)}
-                                            >
-                                                {showAddCategory ? 'Cancel' : '+ Add New'}
-                                            </button>
+                                            <div className="d-flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                    onClick={() => {
+                                                        setShowAddCategory(!showAddCategory);
+                                                        setShowRemoveCategory(false);
+                                                    }}
+                                                >
+                                                    {showAddCategory ? 'Cancel' : '+ Add New'}
+                                                </button>
+                                                {categories.length > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                        onClick={() => {
+                                                            setShowRemoveCategory(!showRemoveCategory);
+                                                            setShowAddCategory(false);
+                                                        }}
+                                                    >
+                                                        {showRemoveCategory ? 'Cancel' : 'Remove'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                         {showAddCategory ? (
                                             <div className="input-group mb-2">
@@ -493,6 +560,30 @@ export default function Edit({ asset, employees }) {
                                                 </button>
                                             </div>
                                         ) : null}
+                                        {showRemoveCategory ? (
+                                            <div className="input-group mb-2">
+                                                <select
+                                                    className="form-select"
+                                                    value={selectedCategoryToDelete}
+                                                    onChange={e => setSelectedCategoryToDelete(e.target.value)}
+                                                >
+                                                    <option value="">Select category to delete</option>
+                                                    {categories.map(category => (
+                                                        <option key={category.id} value={category.id}>
+                                                            {category.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-danger"
+                                                    onClick={handleConfirmDeleteCategory}
+                                                    disabled={deletingCategory || !selectedCategoryToDelete}
+                                                >
+                                                    {deletingCategory ? '...' : 'Delete'}
+                                                </button>
+                                            </div>
+                                        ) : null}
                                         <select
                                             className={`form-select ${errors.asset_category ? 'is-invalid' : ''}`}
                                             id="asset_category"
@@ -508,25 +599,6 @@ export default function Edit({ asset, employees }) {
                                                 </option>
                                             ))}
                                         </select>
-                                        {categories.length > 0 && (
-                                            <div className="mt-2">
-                                                <small className="text-muted">Quick delete:</small>
-                                                <div className="d-flex flex-wrap gap-1 mt-1">
-                                                    {categories.map(category => (
-                                                        <span
-                                                            key={category.id}
-                                                            className="badge bg-secondary d-flex align-items-center gap-1"
-                                                            style={{ cursor: 'pointer' }}
-                                                            onClick={() => handleDeleteCategory(category.id, category.name)}
-                                                            title="Click to delete"
-                                                        >
-                                                            {category.name}
-                                                            <span>×</span>
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
                                         {errors.asset_category && (
                                             <div className="invalid-feedback">
                                                 {errors.asset_category}
@@ -538,13 +610,30 @@ export default function Edit({ asset, employees }) {
                                     <div className="mb-3">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
                                             <label htmlFor="brand_manufacturer" className="form-label mb-0">Brand / Manufacturer *</label>
-                                            <button
-                                                type="button"
-                                                className="btn btn-sm btn-link p-0 text-decoration-none"
-                                                onClick={() => setShowAddBrand(!showAddBrand)}
-                                            >
-                                                {showAddBrand ? 'Cancel' : '+ Add New'}
-                                            </button>
+                                            <div className="d-flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                    onClick={() => {
+                                                        setShowAddBrand(!showAddBrand);
+                                                        setShowRemoveBrand(false);
+                                                    }}
+                                                >
+                                                    {showAddBrand ? 'Cancel' : '+ Add New'}
+                                                </button>
+                                                {brands.length > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                        onClick={() => {
+                                                            setShowRemoveBrand(!showRemoveBrand);
+                                                            setShowAddBrand(false);
+                                                        }}
+                                                    >
+                                                        {showRemoveBrand ? 'Cancel' : 'Remove'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                         {showAddBrand ? (
                                             <div className="input-group mb-2">
@@ -566,6 +655,30 @@ export default function Edit({ asset, employees }) {
                                                 </button>
                                             </div>
                                         ) : null}
+                                        {showRemoveBrand ? (
+                                            <div className="input-group mb-2">
+                                                <select
+                                                    className="form-select"
+                                                    value={selectedBrandToDelete}
+                                                    onChange={e => setSelectedBrandToDelete(e.target.value)}
+                                                >
+                                                    <option value="">Select brand to delete</option>
+                                                    {brands.map(brand => (
+                                                        <option key={brand.id} value={brand.id}>
+                                                            {brand.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-danger"
+                                                    onClick={handleConfirmDeleteBrand}
+                                                    disabled={deletingBrand || !selectedBrandToDelete}
+                                                >
+                                                    {deletingBrand ? '...' : 'Delete'}
+                                                </button>
+                                            </div>
+                                        ) : null}
                                         <select
                                             className={`form-select ${errors.brand_manufacturer ? 'is-invalid' : ''}`}
                                             id="brand_manufacturer"
@@ -581,25 +694,6 @@ export default function Edit({ asset, employees }) {
                                                 </option>
                                             ))}
                                         </select>
-                                        {brands.length > 0 && (
-                                            <div className="mt-2">
-                                                <small className="text-muted">Quick delete:</small>
-                                                <div className="d-flex flex-wrap gap-1 mt-1">
-                                                    {brands.map(brand => (
-                                                        <span
-                                                            key={brand.id}
-                                                            className="badge bg-secondary d-flex align-items-center gap-1"
-                                                            style={{ cursor: 'pointer' }}
-                                                            onClick={() => handleDeleteBrand(brand.id, brand.name)}
-                                                            title="Click to delete"
-                                                        >
-                                                            {brand.name}
-                                                            <span>×</span>
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
                                         {errors.brand_manufacturer && (
                                             <div className="invalid-feedback">
                                                 {errors.brand_manufacturer}
@@ -671,13 +765,30 @@ export default function Edit({ asset, employees }) {
                                     <div className="mb-3">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
                                             <label htmlFor="vendor_supplier" className="form-label mb-0">Vendor / Supplier</label>
-                                            <button
-                                                type="button"
-                                                className="btn btn-sm btn-link p-0 text-decoration-none"
-                                                onClick={() => setShowAddSupplier(!showAddSupplier)}
-                                            >
-                                                {showAddSupplier ? 'Cancel' : '+ Add New'}
-                                            </button>
+                                            <div className="d-flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                    onClick={() => {
+                                                        setShowAddSupplier(!showAddSupplier);
+                                                        setShowRemoveSupplier(false);
+                                                    }}
+                                                >
+                                                    {showAddSupplier ? 'Cancel' : '+ Add New'}
+                                                </button>
+                                                {suppliers.length > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-link p-0 text-decoration-none"
+                                                        onClick={() => {
+                                                            setShowRemoveSupplier(!showRemoveSupplier);
+                                                            setShowAddSupplier(false);
+                                                        }}
+                                                    >
+                                                        {showRemoveSupplier ? 'Cancel' : 'Remove'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                         {showAddSupplier ? (
                                             <div className="input-group mb-2">
@@ -699,6 +810,30 @@ export default function Edit({ asset, employees }) {
                                                 </button>
                                             </div>
                                         ) : null}
+                                        {showRemoveSupplier ? (
+                                            <div className="input-group mb-2">
+                                                <select
+                                                    className="form-select"
+                                                    value={selectedSupplierToDelete}
+                                                    onChange={e => setSelectedSupplierToDelete(e.target.value)}
+                                                >
+                                                    <option value="">Select supplier to delete</option>
+                                                    {suppliers.map(supplier => (
+                                                        <option key={supplier.id} value={supplier.id}>
+                                                            {supplier.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-danger"
+                                                    onClick={handleConfirmDeleteSupplier}
+                                                    disabled={deletingSupplier || !selectedSupplierToDelete}
+                                                >
+                                                    {deletingSupplier ? '...' : 'Delete'}
+                                                </button>
+                                            </div>
+                                        ) : null}
                                         <select
                                             className={`form-select ${errors.vendor_supplier ? 'is-invalid' : ''}`}
                                             id="vendor_supplier"
@@ -713,25 +848,6 @@ export default function Edit({ asset, employees }) {
                                                 </option>
                                             ))}
                                         </select>
-                                        {suppliers.length > 0 && (
-                                            <div className="mt-2">
-                                                <small className="text-muted">Quick delete:</small>
-                                                <div className="d-flex flex-wrap gap-1 mt-1">
-                                                    {suppliers.map(supplier => (
-                                                        <span
-                                                            key={supplier.id}
-                                                            className="badge bg-secondary d-flex align-items-center gap-1"
-                                                            style={{ cursor: 'pointer' }}
-                                                            onClick={() => handleDeleteSupplier(supplier.id, supplier.name)}
-                                                            title="Click to delete"
-                                                        >
-                                                            {supplier.name}
-                                                            <span>×</span>
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
                                         {errors.vendor_supplier && (
                                             <div className="invalid-feedback">
                                                 {errors.vendor_supplier}
