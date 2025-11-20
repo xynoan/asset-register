@@ -386,8 +386,8 @@ export default function Show({ asset }) {
                                                     {modificationHistory.map((entry, index) => (
                                                         <tr key={index}>
                                                             <td>
-                                                                {entry.timestamp ? moment(entry.timestamp).format('DD/MM/YYYY HH:mm') : 
-                                                                 entry.date ? moment(entry.date).format('DD/MM/YYYY') : 'N/A'}
+                                                                {entry.timestamp ? moment.utc(entry.timestamp).local().format('DD/MM/YYYY HH:mm') : 
+                                                                 entry.date ? moment(entry.date).format('DD/MM/YYYY HH:mm') : 'N/A'}
                                                             </td>
                                                             <td>{entry.modified_by || 'System'}</td>
                                                             <td>
