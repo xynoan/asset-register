@@ -618,7 +618,18 @@ export default function Create({ employees }) {
                                             className={`form-control ${errors.purchase_date ? 'is-invalid' : ''}`}
                                             id="purchase_date"
                                             value={data.purchase_date}
-                                            onChange={e => setData('purchase_date', e.target.value)}
+                                            onChange={e => {
+                                                const selectedDate = e.target.value;
+                                                const today = new Date().toISOString().split('T')[0];
+                                                if (selectedDate > today) {
+                                                    // Clear the value if it's in the future
+                                                    setData('purchase_date', '');
+                                                    alert('Purchase date cannot be in the future.');
+                                                } else {
+                                                    setData('purchase_date', selectedDate);
+                                                }
+                                            }}
+                                            max={new Date().toISOString().split('T')[0]}
                                         />
                                         {errors.purchase_date && (
                                             <div className="invalid-feedback">

@@ -150,13 +150,13 @@ export default function Edit({ asset, employees }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         // Check if there are any maintenance entry validation errors
         if (Object.keys(maintenanceErrors).length > 0) {
             alert('Please fix the validation errors in the maintenance history before submitting.');
             return;
         }
-        
+
         // When files are present or documents are removed, use POST route to avoid method spoofing issues
         // When no files, use PUT for cleaner semantics
         if (data.documents.length > 0 || data.removed_documents.length > 0) {
@@ -188,7 +188,7 @@ export default function Edit({ asset, employees }) {
     };
 
     const removeMaintenanceEntry = (index) => {
-        setData('maintenance_history', 
+        setData('maintenance_history',
             data.maintenance_history.filter((_, i) => i !== index)
         );
         // Clean up validation errors for removed entry
@@ -210,7 +210,7 @@ export default function Edit({ asset, employees }) {
         const updated = [...data.maintenance_history];
         updated[index] = { ...updated[index], [field]: value };
         setData('maintenance_history', updated);
-        
+
         // Validate cost field - must be integer
         if (field === 'cost') {
             const errors = { ...maintenanceErrors };
@@ -238,7 +238,7 @@ export default function Edit({ asset, employees }) {
     };
 
     const removeNote = (index) => {
-        setData('notes', 
+        setData('notes',
             data.notes.filter((_, i) => i !== index)
         );
     };
@@ -257,7 +257,7 @@ export default function Edit({ asset, employees }) {
     };
 
     const removeComment = (index) => {
-        setData('comments_history', 
+        setData('comments_history',
             data.comments_history.filter((_, i) => i !== index)
         );
     };
@@ -489,14 +489,14 @@ export default function Edit({ asset, employees }) {
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Edit Asset</h1>
                     <div>
-                        <Link 
-                            href={route('assets.show', asset.id)} 
+                        <Link
+                            href={route('assets.show', asset.id)}
                             className="btn btn-outline-secondary me-2"
                         >
                             View Asset
                         </Link>
-                        <Link 
-                            href={route('assets.index')} 
+                        <Link
+                            href={route('assets.index')}
                             className="btn btn-secondary"
                         >
                             Back to List
@@ -707,8 +707,8 @@ export default function Edit({ asset, employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <label htmlFor="model_number" className="form-label">Model Number *</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             className={`form-control ${errors.model_number ? 'is-invalid' : ''}`}
                                             id="model_number"
                                             value={data.model_number}
@@ -725,8 +725,8 @@ export default function Edit({ asset, employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <label htmlFor="serial_number" className="form-label">Serial Number *</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             className={`form-control ${errors.serial_number ? 'is-invalid' : ''}`}
                                             id="serial_number"
                                             value={data.serial_number}
@@ -746,13 +746,23 @@ export default function Edit({ asset, employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <label htmlFor="purchase_date" className="form-label">Purchase Date *</label>
-                                        <input 
-                                            type="date" 
+                                        <input
+                                            type="date"
                                             className={`form-control ${errors.purchase_date ? 'is-invalid' : ''}`}
                                             id="purchase_date"
                                             value={data.purchase_date}
-                                            onChange={e => setData('purchase_date', e.target.value)}
-                                            required
+                                            onChange={e => {
+                                                const selectedDate = e.target.value;
+                                                const today = new Date().toISOString().split('T')[0];
+                                                if (selectedDate > today) {
+                                                    // Clear the value if it's in the future
+                                                    setData('purchase_date', '');
+                                                    alert('Purchase date cannot be in the future.');
+                                                } else {
+                                                    setData('purchase_date', selectedDate);
+                                                }
+                                            }}
+                                            max={new Date().toISOString().split('T')[0]}
                                         />
                                         {errors.purchase_date && (
                                             <div className="invalid-feedback">
@@ -861,8 +871,8 @@ export default function Edit({ asset, employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <label htmlFor="warranty_expiry_date" className="form-label">Warranty Expiry Date</label>
-                                        <input 
-                                            type="date" 
+                                        <input
+                                            type="date"
                                             className={`form-control ${errors.warranty_expiry_date ? 'is-invalid' : ''}`}
                                             id="warranty_expiry_date"
                                             value={data.warranty_expiry_date}
@@ -1217,17 +1227,17 @@ export default function Edit({ asset, employees }) {
                                     </div>
                                 )}
                             </div>
-                            
+
                             <div className="d-flex justify-content-between">
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className="btn btn-primary"
                                     disabled={processing}
                                 >
                                     {processing ? 'Updating...' : 'Update Asset'}
                                 </button>
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     className="btn btn-outline-secondary"
                                     onClick={() => reset()}
                                 >

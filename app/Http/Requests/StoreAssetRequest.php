@@ -28,7 +28,7 @@ class StoreAssetRequest extends FormRequest
             'brand_manufacturer' => ['required', 'string', 'max:255'],
             'model_number' => ['required', 'integer'],
             'serial_number' => ['required', 'integer'],
-            'purchase_date' => ['required', 'date'],
+            'purchase_date' => ['required', 'date', 'before_or_equal:today'],
             'vendor_supplier' => ['nullable', 'string', 'max:255'],
             'warranty_expiry_date' => ['nullable', 'date', 'after:purchase_date'],
             'status' => ['required', 'in:In-use,Spare,Under Maintenance,Retired'],
