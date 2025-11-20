@@ -21,6 +21,9 @@ export default function Edit({ asset, employees }) {
     const [addingBrand, setAddingBrand] = useState(false);
     const [addingSupplier, setAddingSupplier] = useState(false);
 
+    // State for maintenance entry validation errors
+    const [maintenanceErrors, setMaintenanceErrors] = useState({});
+
     // Parse maintenance_history - handle both string (JSON) and array formats
     const parseMaintenanceHistory = () => {
         if (!asset.maintenance_history) return [];
@@ -170,12 +173,43 @@ export default function Edit({ asset, employees }) {
         setData('maintenance_history', 
             data.maintenance_history.filter((_, i) => i !== index)
         );
+        // Clean up validation errors for removed entry
+        const errors = { ...maintenanceErrors };
+        // Re-index errors after removal
+        const newErrors = {};
+        Object.keys(errors).forEach(key => {
+            const keyNum = parseInt(key);
+            if (keyNum < index) {
+                newErrors[keyNum] = errors[key];
+            } else if (keyNum > index) {
+                newErrors[keyNum - 1] = errors[key];
+            }
+        });
+        setMaintenanceErrors(newErrors);
     };
 
     const updateMaintenanceEntry = (index, field, value) => {
         const updated = [...data.maintenance_history];
         updated[index] = { ...updated[index], [field]: value };
         setData('maintenance_history', updated);
+        
+        // Validate cost field - must be integer
+        if (field === 'cost') {
+            const errors = { ...maintenanceErrors };
+            if (value && value.trim() !== '') {
+                // Check if value is a valid integer (allows empty string, allows negative)
+                const integerRegex = /^-?\d+$/;
+                if (!integerRegex.test(value.trim())) {
+                    errors[index] = 'Cost must be a whole number (integer)';
+                } else {
+                    delete errors[index];
+                }
+            } else {
+                // Clear error if field is empty
+                delete errors[index];
+            }
+            setMaintenanceErrors(errors);
+        }
     };
 
     const addNote = () => {
@@ -813,11 +847,16 @@ export default function Edit({ asset, employees }) {
                                                         <td>
                                                             <input
                                                                 type="text"
-                                                                className="form-control form-control-sm"
+                                                                className={`form-control form-control-sm ${maintenanceErrors[index] ? 'is-invalid' : ''}`}
                                                                 value={entry.cost || ''}
                                                                 onChange={e => updateMaintenanceEntry(index, 'cost', e.target.value)}
                                                                 placeholder="Cost"
                                                             />
+                                                            {maintenanceErrors[index] && (
+                                                                <div className="invalid-feedback" style={{ display: 'block' }}>
+                                                                    {maintenanceErrors[index]}
+                                                                </div>
+                                                            )}
                                                         </td>
                                                         <td>
                                                             <select
