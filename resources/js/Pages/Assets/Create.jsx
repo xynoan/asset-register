@@ -106,10 +106,9 @@ export default function Create({ employees }) {
     };
 
     const addComment = () => {
-        const addedBy = auth?.user?.name || 'System';
         setData('comments_history', [
             ...data.comments_history,
-            { date: '', comment: '', added_by: addedBy }
+            { date: '', comment: '', added_by: 'System' }
         ]);
     };
 
@@ -739,8 +738,7 @@ export default function Create({ employees }) {
                                             <thead className="table-light">
                                                 <tr>
                                                     <th style={{ width: '20%' }}>Date</th>
-                                                    <th style={{ width: '60%' }}>Comment</th>
-                                                    <th style={{ width: '20%' }}>Added By</th>
+                                                    <th style={{ width: '70%' }}>Comment</th>
                                                     <th style={{ width: '10%' }}>Action</th>
                                                 </tr>
                                             </thead>
@@ -762,16 +760,6 @@ export default function Create({ employees }) {
                                                                 value={comment.comment || ''}
                                                                 onChange={e => updateComment(index, 'comment', e.target.value)}
                                                                 placeholder="Enter comment"
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control form-control-sm"
-                                                                value={comment.added_by || ''}
-                                                                readOnly
-                                                                disabled
-                                                                style={{ backgroundColor: '#e9ecef', cursor: 'not-allowed' }}
                                                             />
                                                         </td>
                                                         <td>
