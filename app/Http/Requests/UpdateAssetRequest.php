@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 
 class UpdateAssetRequest extends FormRequest
 {
@@ -26,7 +28,7 @@ class UpdateAssetRequest extends FormRequest
             'brand_manufacturer' => ['required', 'string', 'max:255'],
             'model_number' => ['required', 'integer'],
             'serial_number' => ['required', 'integer'],
-            'purchase_date' => ['required', 'date'],
+            'purchase_date' => ['required', 'date', 'before_or_equal:today'],
             'vendor_supplier' => ['nullable', 'string', 'max:255'],
             'warranty_expiry_date' => ['nullable', 'date', 'after:purchase_date'],
             'status' => ['required', 'in:In-use,Spare,Under Maintenance,Retired'],
@@ -167,10 +169,10 @@ class UpdateAssetRequest extends FormRequest
     /**
      * Handle a failed validation attempt.
      */
-    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    protected function failedValidation(Validator $validator)
     {
         if ($this->expectsJson() || $this->is('api/*')) {
-            throw new \Illuminate\Http\Exceptions\HttpResponseException(
+            throw new HttpResponseException(
                 response()->json([
                     'success' => false,
                     'message' => 'Validation failed',

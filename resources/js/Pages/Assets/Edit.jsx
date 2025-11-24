@@ -514,7 +514,7 @@ export default function Edit({ asset, employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
-                                            <label htmlFor="asset_category" className="form-label mb-0">Asset Category *</label>
+                                            <label htmlFor="asset_category" className="form-label mb-0">Asset Category <span className="text-danger">*</span></label>
                                             <div className="d-flex gap-2">
                                                 <button
                                                     type="button"
@@ -609,7 +609,7 @@ export default function Edit({ asset, employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
-                                            <label htmlFor="brand_manufacturer" className="form-label mb-0">Brand / Manufacturer *</label>
+                                            <label htmlFor="brand_manufacturer" className="form-label mb-0">Brand / Manufacturer <span className="text-danger">*</span></label>
                                             <div className="d-flex gap-2">
                                                 <button
                                                     type="button"
@@ -706,7 +706,7 @@ export default function Edit({ asset, employees }) {
                             <div className="row">
                                 <div className="col-md-6">
                                     <div className="mb-3">
-                                        <label htmlFor="model_number" className="form-label">Model Number *</label>
+                                        <label htmlFor="model_number" className="form-label">Model Number <span className="text-danger">*</span></label>
                                         <input
                                             type="text"
                                             className={`form-control ${errors.model_number ? 'is-invalid' : ''}`}
@@ -724,7 +724,7 @@ export default function Edit({ asset, employees }) {
                                 </div>
                                 <div className="col-md-6">
                                     <div className="mb-3">
-                                        <label htmlFor="serial_number" className="form-label">Serial Number *</label>
+                                        <label htmlFor="serial_number" className="form-label">Serial Number <span className="text-danger">*</span></label>
                                         <input
                                             type="text"
                                             className={`form-control ${errors.serial_number ? 'is-invalid' : ''}`}
@@ -745,7 +745,7 @@ export default function Edit({ asset, employees }) {
                             <div className="row">
                                 <div className="col-md-6">
                                     <div className="mb-3">
-                                        <label htmlFor="purchase_date" className="form-label">Purchase Date *</label>
+                                        <label htmlFor="purchase_date" className="form-label">Purchase Date <span className="text-danger">*</span></label>
                                         <input
                                             type="date"
                                             className={`form-control ${errors.purchase_date ? 'is-invalid' : ''}`}
@@ -774,7 +774,7 @@ export default function Edit({ asset, employees }) {
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
-                                            <label htmlFor="vendor_supplier" className="form-label mb-0">Vendor / Supplier</label>
+                                            <label htmlFor="vendor_supplier" className="form-label mb-0">Vendor / Supplier <span className="text-danger">*</span></label>
                                             <div className="d-flex gap-2">
                                                 <button
                                                     type="button"
@@ -887,7 +887,7 @@ export default function Edit({ asset, employees }) {
                                 </div>
                                 <div className="col-md-6">
                                     <div className="mb-3">
-                                        <label htmlFor="status" className="form-label">Status *</label>
+                                        <label htmlFor="status" className="form-label">Status <span className="text-danger">*</span></label>
                                         <select
                                             className={`form-select ${errors.status ? 'is-invalid' : ''}`}
                                             id="status"
