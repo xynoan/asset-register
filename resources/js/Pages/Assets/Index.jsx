@@ -138,7 +138,7 @@ export default function Index({ assets, flash }) {
                                             <td>
                                                 {
                                                     asset.assigned_employee ? (
-                                                        <span>{asset.assigned_employee.employee_no}</span>
+                                                        <span>{asset.assigned_employee.full_name}</span>
                                                     ) : (
                                                         <span className="text-muted">Unassigned</span>
                                                     )

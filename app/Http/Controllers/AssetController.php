@@ -189,6 +189,25 @@ class AssetController extends Controller
         $asset->status_duration_days = $asset->getStatusDurationDays();
         $asset->status_duration_string = $asset->getStatusDurationString();
 
+        // Process maintenance_history to resolve performed_by employee IDs to full names
+        if ($asset->maintenance_history) {
+            // Handle both array and JSON string formats
+            $maintenanceHistory = $asset->maintenance_history;
+            if (is_string($maintenanceHistory)) {
+                $maintenanceHistory = json_decode($maintenanceHistory, true);
+            }
+            
+            if (is_array($maintenanceHistory)) {
+                foreach ($maintenanceHistory as &$entry) {
+                    if (isset($entry['performed_by']) && is_numeric($entry['performed_by'])) {
+                        $employee = Employee::find($entry['performed_by']);
+                        $entry['performed_by'] = $employee ? $employee->full_name : 'N/A';
+                    }
+                }
+                $asset->maintenance_history = $maintenanceHistory;
+            }
+        }
+
         // Convert document paths to URLs for frontend access
         // Also normalize document structure for backward compatibility
         if ($asset->document_paths && is_array($asset->document_paths)) {

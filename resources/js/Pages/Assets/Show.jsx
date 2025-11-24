@@ -222,7 +222,7 @@ export default function Show({ asset }) {
                                     <p className="form-control-plaintext">
                                         {
                                             asset.assigned_employee ? (
-                                                <span>{asset.assigned_employee.full_name} ({asset.assigned_employee.employee_no})</span>
+                                                <span>{asset.assigned_employee.full_name}</span>
                                             ) : (
                                                 <span className="text-muted">Unassigned</span>
                                             )
