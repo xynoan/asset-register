@@ -1005,7 +1005,7 @@ export default function Edit({ asset, employees }) {
                                                                 ))}
                                                             </select>
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-sm btn-outline-danger"
@@ -1072,7 +1072,7 @@ export default function Edit({ asset, employees }) {
                                                                 placeholder="Enter comment"
                                                             />
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-sm btn-outline-danger"
@@ -1139,7 +1139,7 @@ export default function Edit({ asset, employees }) {
                                                                 placeholder="Enter note"
                                                             />
                                                         </td>
-                                                        <td>
+                                                        <td className="text-center">
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-sm btn-outline-danger"
