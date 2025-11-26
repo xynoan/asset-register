@@ -548,7 +548,7 @@ export default function Edit({ asset, employees }) {
                                                     placeholder="Enter new category"
                                                     value={newCategoryName}
                                                     onChange={e => setNewCategoryName(e.target.value)}
-                                                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddCategory())}
+                                                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddCategory())}
                                                 />
                                                 <button
                                                     type="button"
@@ -643,7 +643,7 @@ export default function Edit({ asset, employees }) {
                                                     placeholder="Enter new brand"
                                                     value={newBrandName}
                                                     onChange={e => setNewBrandName(e.target.value)}
-                                                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddBrand())}
+                                                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddBrand())}
                                                 />
                                                 <button
                                                     type="button"
@@ -808,7 +808,7 @@ export default function Edit({ asset, employees }) {
                                                     placeholder="Enter new supplier"
                                                     value={newSupplierName}
                                                     onChange={e => setNewSupplierName(e.target.value)}
-                                                    onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), handleAddSupplier())}
+                                                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddSupplier())}
                                                 />
                                                 <button
                                                     type="button"
