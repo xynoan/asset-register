@@ -1,6 +1,7 @@
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import moment from 'moment';
 import { useState } from 'react';
+import SectionNavigation from '@/Components/SectionNavigation';
 
 export default function Index({ assets, flash }) {
     const { delete: destroy, processing } = useForm();
@@ -75,6 +76,8 @@ export default function Index({ assets, flash }) {
                         <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 )}
+
+                <SectionNavigation />
 
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Assets</h1>

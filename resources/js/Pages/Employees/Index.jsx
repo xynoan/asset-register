@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import moment from 'moment';
+import SectionNavigation from '@/Components/SectionNavigation';
 
 export default function Index({ employees, flash }) {
     const { delete: destroy, processing } = useForm();
@@ -21,6 +22,8 @@ export default function Index({ employees, flash }) {
                     </div>
                 )}
                 
+                <SectionNavigation />
+
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Employees</h1>
                     <Link href={route('employees.create')} className="btn btn-primary">
