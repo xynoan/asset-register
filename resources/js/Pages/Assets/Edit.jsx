@@ -2,6 +2,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getTodayLocalDate } from '../../utils/dateUtils';
 
 export default function Edit({ asset, employees }) {
     const { auth } = usePage().props;
@@ -753,7 +754,7 @@ export default function Edit({ asset, employees }) {
                                             value={data.purchase_date}
                                             onChange={e => {
                                                 const selectedDate = e.target.value;
-                                                const today = new Date().toISOString().split('T')[0];
+                                                const today = getTodayLocalDate();
                                                 if (selectedDate > today) {
                                                     // Clear the value if it's in the future
                                                     setData('purchase_date', '');
@@ -762,7 +763,7 @@ export default function Edit({ asset, employees }) {
                                                     setData('purchase_date', selectedDate);
                                                 }
                                             }}
-                                            max={new Date().toISOString().split('T')[0]}
+                                            max={getTodayLocalDate()}
                                         />
                                         {errors.purchase_date && (
                                             <div className="invalid-feedback">

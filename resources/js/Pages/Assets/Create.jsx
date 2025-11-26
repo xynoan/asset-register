@@ -1,6 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getTodayLocalDate } from '../../utils/dateUtils';
 
 export default function Create({ employees }) {
     const { auth } = usePage().props;
@@ -620,7 +621,7 @@ export default function Create({ employees }) {
                                             value={data.purchase_date}
                                             onChange={e => {
                                                 const selectedDate = e.target.value;
-                                                const today = new Date().toISOString().split('T')[0];
+                                                const today = getTodayLocalDate();
                                                 if (selectedDate > today) {
                                                     // Clear the value if it's in the future
                                                     setData('purchase_date', '');
@@ -629,7 +630,7 @@ export default function Create({ employees }) {
                                                     setData('purchase_date', selectedDate);
                                                 }
                                             }}
-                                            max={new Date().toISOString().split('T')[0]}
+                                            max={getTodayLocalDate()}
                                         />
                                         {errors.purchase_date && (
                                             <div className="invalid-feedback">
