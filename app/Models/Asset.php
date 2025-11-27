@@ -144,6 +144,7 @@ class Asset extends Model
             'employee_id' => $newEmployeeId,
             'employee_no' => $employee ? $employee->employee_no : null,
             'employee_name' => $employee ? $employee->full_name : 'Unassigned',
+            'status' => $this->status,
             'assigned_at' => now()->toDateTimeString(),
             'assigned_by_id' => $userId,
             'assigned_by' => $user ? $user->name : 'System',

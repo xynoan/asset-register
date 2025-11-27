@@ -391,9 +391,10 @@ export default function Show({ asset }) {
                                                 <thead className="table-light">
                                                     <tr>
                                                         <th style={{ width: '15%' }}>Date & Time</th>
-                                                        <th style={{ width: '25%' }}>Assigned To</th>
-                                                        <th style={{ width: '20%' }}>Employee No</th>
-                                                        <th style={{ width: '40%' }}>Assigned By</th>
+                                                        <th style={{ width: '20%' }}>Assigned To</th>
+                                                        <th style={{ width: '15%' }}>Employee No</th>
+                                                        <th style={{ width: '20%' }}>Status</th>
+                                                        <th style={{ width: '30%' }}>Assigned By</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -410,6 +411,15 @@ export default function Show({ asset }) {
                                                                 )}
                                                             </td>
                                                             <td>{entry.employee_no || '—'}</td>
+                                                            <td>
+                                                                {entry.status ? (
+                                                                    <span className={`badge ${getStatusBadgeClass(entry.status)}`}>
+                                                                        {entry.status}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-muted">—</span>
+                                                                )}
+                                                            </td>
                                                             <td>{entry.assigned_by || 'System'}</td>
                                                         </tr>
                                                     ))}
