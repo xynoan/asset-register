@@ -133,18 +133,21 @@ class Asset extends Model
     /**
      * Record an assignment change in the assignment history.
      */
-    public function recordAssignmentChange(?int $newEmployeeId, int $userId): void
+    public function recordAssignmentChange(?int $newEmployeeId, int $userId, ?string $status = null): void
     {
         $history = $this->assignment_history ?? [];
         
         $employee = $newEmployeeId ? Employee::find($newEmployeeId) : null;
         $user = User::find($userId);
         
+        // Use provided status, or fall back to current status if not provided
+        $statusToRecord = $status ?? $this->status;
+        
         $history[] = [
             'employee_id' => $newEmployeeId,
             'employee_no' => $employee ? $employee->employee_no : null,
             'employee_name' => $employee ? $employee->full_name : 'Unassigned',
-            'status' => $this->status,
+            'status' => $statusToRecord,
             'assigned_at' => now()->toDateTimeString(),
             'assigned_by_id' => $userId,
             'assigned_by' => $user ? $user->name : 'System',

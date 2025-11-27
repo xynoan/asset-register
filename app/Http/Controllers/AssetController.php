@@ -168,7 +168,7 @@ class AssetController extends Controller
 
         // Record initial assignment if assigned
         if ($assignedTo) {
-            $asset->recordAssignmentChange($assignedTo, $userId);
+            $asset->recordAssignmentChange($assignedTo, $userId, $validated['status']);
             $asset->save();
         }
 
@@ -362,7 +362,7 @@ class AssetController extends Controller
         
         // Record assignment change if assignment was modified (before update so it's included in the update)
         if ($oldAssignedTo != $assignedTo) {
-            $asset->recordAssignmentChange($assignedTo, $userId);
+            $asset->recordAssignmentChange($assignedTo, $userId, $newStatus);
         }
         
         // Track field changes for modification history
