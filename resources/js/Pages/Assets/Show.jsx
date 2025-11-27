@@ -82,12 +82,25 @@ export default function Show({ asset }) {
         }
     };
 
+    // Parse assignment_history - handle both string (JSON) and array formats
+    const parseAssignmentHistory = () => {
+        if (!asset.assignment_history) return [];
+        if (Array.isArray(asset.assignment_history)) return asset.assignment_history;
+        try {
+            const parsed = JSON.parse(asset.assignment_history);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
     const maintenanceHistory = parseMaintenanceHistory();
     const documentPaths = parseDocumentPaths();
     const documentUrls = asset.document_urls || [];
     const commentsHistory = parseCommentsHistory();
     const notes = parseNotes();
     const modificationHistory = parseModificationHistory();
+    const assignmentHistory = parseAssignmentHistory();
 
     // Helper function to get file name from path
     const getFileName = (path) => {
@@ -224,7 +237,7 @@ export default function Show({ asset }) {
                                             asset.assigned_employee ? (
                                                 <span>{asset.assigned_employee.full_name}</span>
                                             ) : (
-                                                <span className="text-muted">Unassigned</span>
+                                                <span className="text-danger">Unassigned</span>
                                             )
                                         }
                                     </p>
@@ -358,6 +371,46 @@ export default function Show({ asset }) {
                                                             <td>{note.date ? moment(note.date).format('DD/MM/YYYY') : 'N/A'}</td>
                                                             <td>{note.note || 'N/A'}</td>
                                                             <td>{note.added_by || 'System'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {assignmentHistory.length > 0 && (
+                            <div className="row">
+                                <div className="col-12">
+                                    <div className="mb-3">
+                                        <label className="form-label fw-bold">Assignment History:</label>
+                                        <div className="table-responsive">
+                                            <table className="table table-bordered table-sm">
+                                                <thead className="table-light">
+                                                    <tr>
+                                                        <th style={{ width: '15%' }}>Date & Time</th>
+                                                        <th style={{ width: '25%' }}>Assigned To</th>
+                                                        <th style={{ width: '20%' }}>Employee No</th>
+                                                        <th style={{ width: '40%' }}>Assigned By</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {[...assignmentHistory].reverse().map((entry, index) => (
+                                                        <tr key={index}>
+                                                            <td>
+                                                                {entry.assigned_at ? moment(entry.assigned_at).format('DD/MM/YYYY HH:mm') : 'N/A'}
+                                                            </td>
+                                                            <td>
+                                                                {entry.employee_name ? (
+                                                                    <span>{entry.employee_name}</span>
+                                                                ) : (
+                                                                    <span className="text-danger">Unassigned</span>
+                                                                )}
+                                                            </td>
+                                                            <td>{entry.employee_no || '—'}</td>
+                                                            <td>{entry.assigned_by || 'System'}</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>

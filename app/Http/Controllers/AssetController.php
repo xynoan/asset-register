@@ -166,6 +166,12 @@ class AssetController extends Controller
         // Record initial status in status history
         $asset->recordStatusChange($validated['status'], $userId);
 
+        // Record initial assignment if assigned
+        if ($assignedTo) {
+            $asset->recordAssignmentChange($assignedTo, $userId);
+            $asset->save();
+        }
+
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([
                 'success' => true,
@@ -205,6 +211,26 @@ class AssetController extends Controller
                     }
                 }
                 $asset->maintenance_history = $maintenanceHistory;
+            }
+        }
+
+        // Process assignment_history to ensure user names are resolved (already stored in model, but ensure consistency)
+        if ($asset->assignment_history) {
+            // Handle both array and JSON string formats
+            $assignmentHistory = $asset->assignment_history;
+            if (is_string($assignmentHistory)) {
+                $assignmentHistory = json_decode($assignmentHistory, true);
+            }
+            
+            if (is_array($assignmentHistory)) {
+                foreach ($assignmentHistory as &$entry) {
+                    // Resolve assigned_by user ID to name if not already set
+                    if (isset($entry['assigned_by_id']) && is_numeric($entry['assigned_by_id']) && !isset($entry['assigned_by'])) {
+                        $user = User::find($entry['assigned_by_id']);
+                        $entry['assigned_by'] = $user ? $user->name : 'System';
+                    }
+                }
+                $asset->assignment_history = $assignmentHistory;
             }
         }
 
@@ -330,6 +356,14 @@ class AssetController extends Controller
         if ($oldStatus !== $newStatus) {
             $asset->recordStatusChange($newStatus, $userId);
         }
+
+        // Check if assignment changed and record it
+        $oldAssignedTo = $asset->assigned_to;
+        
+        // Record assignment change if assignment was modified (before update so it's included in the update)
+        if ($oldAssignedTo != $assignedTo) {
+            $asset->recordAssignmentChange($assignedTo, $userId);
+        }
         
         // Track field changes for modification history
         $changes = [];
@@ -418,6 +452,11 @@ class AssetController extends Controller
         if ($oldStatus !== $newStatus) {
             $updateData['status_history'] = $asset->status_history;
             $updateData['status_changed_at'] = $asset->status_changed_at;
+        }
+
+        // Include assignment_history if assignment changed
+        if ($oldAssignedTo != $assignedTo) {
+            $updateData['assignment_history'] = $asset->assignment_history;
         }
 
         // Record modification history if there are changes

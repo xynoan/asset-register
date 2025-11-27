@@ -39,6 +39,7 @@ class Asset extends Model
         'modification_history',
         'document_paths',
         'assigned_to',
+        'assignment_history',
         'created_by',
         'updated_by',
     ];
@@ -57,6 +58,7 @@ class Asset extends Model
         'notes' => 'array',
         'modification_history' => 'array',
         'document_paths' => 'array',
+        'assignment_history' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -126,5 +128,27 @@ class Asset extends Model
         }
 
         return "{$this->status} for {$days} " . ($days === 1 ? 'day' : 'days');
+    }
+
+    /**
+     * Record an assignment change in the assignment history.
+     */
+    public function recordAssignmentChange(?int $newEmployeeId, int $userId): void
+    {
+        $history = $this->assignment_history ?? [];
+        
+        $employee = $newEmployeeId ? Employee::find($newEmployeeId) : null;
+        $user = User::find($userId);
+        
+        $history[] = [
+            'employee_id' => $newEmployeeId,
+            'employee_no' => $employee ? $employee->employee_no : null,
+            'employee_name' => $employee ? $employee->full_name : 'Unassigned',
+            'assigned_at' => now()->toDateTimeString(),
+            'assigned_by_id' => $userId,
+            'assigned_by' => $user ? $user->name : 'System',
+        ];
+
+        $this->assignment_history = $history;
     }
 }
