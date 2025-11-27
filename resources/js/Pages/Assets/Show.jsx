@@ -401,7 +401,7 @@ export default function Show({ asset }) {
                                                     {[...assignmentHistory].reverse().map((entry, index) => (
                                                         <tr key={index}>
                                                             <td>
-                                                                {entry.assigned_at ? moment(entry.assigned_at).format('DD/MM/YYYY HH:mm') : 'N/A'}
+                                                                {entry.assigned_at ? moment.utc(entry.assigned_at).local().format('DD/MM/YYYY HH:mm') : 'N/A'}
                                                             </td>
                                                             <td>
                                                                 {entry.employee_name ? (
