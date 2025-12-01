@@ -1,0 +1,21 @@
+/* Header Navigation Hover Effects */
+.nav-link:not(.link-secondary) {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link:not(.link-secondary)::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: currentColor;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:not(.link-secondary):hover::after {
+    width: 80%;
+}
