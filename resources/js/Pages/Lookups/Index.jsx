@@ -5,26 +5,60 @@ import Header from '@/Components/Header';
 
 export default function Index({ categories, brands, suppliers }) {
     const [activeTab, setActiveTab] = useState('categories');
-    const [editingId, setEditingId] = useState(null);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [currentType, setCurrentType] = useState('');
+    const [currentItem, setCurrentItem] = useState(null);
     const [editValue, setEditValue] = useState('');
-    const [adding, setAdding] = useState(false);
     const [newName, setNewName] = useState('');
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
-    const handleEdit = (id, currentName) => {
-        setEditingId(id);
-        setEditValue(currentName);
+    const handleOpenAddModal = (type) => {
+        setCurrentType(type);
+        setNewName('');
+        setErrors({});
+        setShowAddModal(true);
+    };
+
+    const handleCloseAddModal = () => {
+        setShowAddModal(false);
+        setNewName('');
         setErrors({});
     };
 
-    const handleCancelEdit = () => {
-        setEditingId(null);
+    const handleOpenEditModal = (item, type) => {
+        setCurrentItem(item);
+        setCurrentType(type);
+        setEditValue(item.name);
+        setErrors({});
+        setShowEditModal(true);
+    };
+
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
+        setCurrentItem(null);
         setEditValue('');
         setErrors({});
     };
 
-    const handleSaveEdit = async (id, type) => {
+    const handleOpenDeleteModal = (item, type) => {
+        if (item.usage_count > 0) {
+            alert(`Cannot delete "${item.name}" because it is currently used by ${item.usage_count} asset(s).`);
+            return;
+        }
+        setCurrentItem(item);
+        setCurrentType(type);
+        setShowDeleteModal(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false);
+        setCurrentItem(null);
+    };
+
+    const handleSaveEdit = async () => {
         if (!editValue.trim()) {
             setErrors({ name: 'Name is required' });
             return;
@@ -34,12 +68,13 @@ export default function Index({ categories, brands, suppliers }) {
         setErrors({});
 
         try {
-            const routeName = `lookups.${type}.update`;
-            const response = await axios.put(route(routeName, id), {
+            const routeName = `lookups.${currentType}.update`;
+            const response = await axios.put(route(routeName, currentItem.id), {
                 name: editValue.trim()
             });
 
             if (response.data.success) {
+                handleCloseEditModal();
                 // Reload the page to get updated data
                 window.location.reload();
             }
@@ -56,7 +91,7 @@ export default function Index({ categories, brands, suppliers }) {
         }
     };
 
-    const handleAdd = async (type) => {
+    const handleAdd = async () => {
         if (!newName.trim()) {
             setErrors({ newName: 'Name is required' });
             return;
@@ -66,14 +101,13 @@ export default function Index({ categories, brands, suppliers }) {
         setErrors({});
 
         try {
-            const routeName = `lookups.${type}.store`;
+            const routeName = `lookups.${currentType}.store`;
             const response = await axios.post(route(routeName), {
                 name: newName.trim()
             });
 
             if (response.data.success) {
-                setNewName('');
-                setAdding(false);
+                handleCloseAddModal();
                 // Reload the page to get updated data
                 window.location.reload();
             }
@@ -90,23 +124,15 @@ export default function Index({ categories, brands, suppliers }) {
         }
     };
 
-    const handleDelete = async (id, name, type, usageCount) => {
-        if (usageCount > 0) {
-            alert(`Cannot delete "${name}" because it is currently used by ${usageCount} asset(s).`);
-            return;
-        }
-
-        if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
-            return;
-        }
-
+    const handleDelete = async () => {
         setLoading(true);
 
         try {
-            const routeName = `lookups.${type}.delete`;
-            const response = await axios.delete(route(routeName, id));
+            const routeName = `lookups.${currentType}.delete`;
+            const response = await axios.delete(route(routeName, currentItem.id));
 
             if (response.data.success) {
+                handleCloseDeleteModal();
                 // Reload the page to get updated data
                 window.location.reload();
             }
@@ -126,76 +152,16 @@ export default function Index({ categories, brands, suppliers }) {
             <div className="card">
                 <div className="card-header d-flex justify-content-between align-items-center">
                     <h5 className="card-title mb-0">{singularName}s</h5>
-                    {!adding && (
-                        <button
-                            type="button"
-                            className="btn btn-sm btn-primary"
-                            onClick={() => {
-                                setAdding(true);
-                                setNewName('');
-                                setErrors({});
-                            }}
-                            disabled={loading}
-                        >
-                            + Add New
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        className="btn btn-sm btn-primary"
+                        onClick={() => handleOpenAddModal(type)}
+                        disabled={loading}
+                    >
+                        + Add New
+                    </button>
                 </div>
                 <div className="card-body">
-                    {adding && (
-                        <div className="mb-3 p-3 border rounded bg-light">
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    className={`form-control ${errors.newName ? 'is-invalid' : ''}`}
-                                    placeholder={`Enter new ${singularName.toLowerCase()} name`}
-                                    value={newName}
-                                    onChange={e => {
-                                        setNewName(e.target.value);
-                                        setErrors({});
-                                    }}
-                                    onKeyDown={e => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleAdd(type);
-                                        } else if (e.key === 'Escape') {
-                                            setAdding(false);
-                                            setNewName('');
-                                            setErrors({});
-                                        }
-                                    }}
-                                    disabled={loading}
-                                    autoFocus
-                                />
-                                <button
-                                    type="button"
-                                    className="btn btn-success"
-                                    onClick={() => handleAdd(type)}
-                                    disabled={loading || !newName.trim()}
-                                >
-                                    {loading ? '...' : 'Save'}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    onClick={() => {
-                                        setAdding(false);
-                                        setNewName('');
-                                        setErrors({});
-                                    }}
-                                    disabled={loading}
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                            {errors.newName && (
-                                <div className="invalid-feedback d-block mt-1">
-                                    {errors.newName}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
                     {items.length === 0 ? (
                         <div className="text-muted text-center py-4">
                             No {singularName.toLowerCase()}s found. Click "Add New" to create one.
@@ -214,36 +180,7 @@ export default function Index({ categories, brands, suppliers }) {
                                     {items.map((item) => (
                                         <tr key={item.id}>
                                             <td>
-                                                {editingId === item.id ? (
-                                                    <div>
-                                                        <input
-                                                            type="text"
-                                                            className={`form-control form-control-sm ${errors.name ? 'is-invalid' : ''}`}
-                                                            value={editValue}
-                                                            onChange={e => {
-                                                                setEditValue(e.target.value);
-                                                                setErrors({});
-                                                            }}
-                                                            onKeyDown={e => {
-                                                                if (e.key === 'Enter') {
-                                                                    e.preventDefault();
-                                                                    handleSaveEdit(item.id, type);
-                                                                } else if (e.key === 'Escape') {
-                                                                    handleCancelEdit();
-                                                                }
-                                                            }}
-                                                            disabled={loading}
-                                                            autoFocus
-                                                        />
-                                                        {errors.name && (
-                                                            <div className="invalid-feedback d-block">
-                                                                {errors.name}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <strong>{item.name}</strong>
-                                                )}
+                                                <strong>{item.name}</strong>
                                             </td>
                                             <td>
                                                 <span className={`badge ${item.usage_count > 0 ? 'bg-warning text-dark' : 'bg-success'}`}>
@@ -251,46 +188,25 @@ export default function Index({ categories, brands, suppliers }) {
                                                 </span>
                                             </td>
                                             <td>
-                                                {editingId === item.id ? (
-                                                    <div className="btn-group btn-group-sm">
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-success"
-                                                            onClick={() => handleSaveEdit(item.id, type)}
-                                                            disabled={loading || !editValue.trim()}
-                                                        >
-                                                            {loading ? '...' : 'Save'}
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-secondary"
-                                                            onClick={handleCancelEdit}
-                                                            disabled={loading}
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div className="btn-group btn-group-sm">
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-outline-primary"
-                                                            onClick={() => handleEdit(item.id, item.name)}
-                                                            disabled={loading || editingId !== null}
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-outline-danger"
-                                                            onClick={() => handleDelete(item.id, item.name, type, item.usage_count)}
-                                                            disabled={loading || editingId !== null || item.usage_count > 0}
-                                                            title={item.usage_count > 0 ? `Cannot delete: used by ${item.usage_count} asset(s)` : 'Delete'}
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    </div>
-                                                )}
+                                                <div className="btn-group btn-group-sm">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-primary"
+                                                        onClick={() => handleOpenEditModal(item, type)}
+                                                        disabled={loading}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-danger"
+                                                        onClick={() => handleOpenDeleteModal(item, type)}
+                                                        disabled={loading || item.usage_count > 0}
+                                                        title={item.usage_count > 0 ? `Cannot delete: used by ${item.usage_count} asset(s)` : 'Delete'}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -321,8 +237,9 @@ export default function Index({ categories, brands, suppliers }) {
                             className={`nav-link ${activeTab === 'categories' ? 'active' : ''}`}
                             onClick={() => {
                                 setActiveTab('categories');
-                                setEditingId(null);
-                                setAdding(false);
+                                setShowAddModal(false);
+                                setShowEditModal(false);
+                                setShowDeleteModal(false);
                                 setErrors({});
                             }}
                         >
@@ -334,8 +251,9 @@ export default function Index({ categories, brands, suppliers }) {
                             className={`nav-link ${activeTab === 'brands' ? 'active' : ''}`}
                             onClick={() => {
                                 setActiveTab('brands');
-                                setEditingId(null);
-                                setAdding(false);
+                                setShowAddModal(false);
+                                setShowEditModal(false);
+                                setShowDeleteModal(false);
                                 setErrors({});
                             }}
                         >
@@ -347,8 +265,9 @@ export default function Index({ categories, brands, suppliers }) {
                             className={`nav-link ${activeTab === 'suppliers' ? 'active' : ''}`}
                             onClick={() => {
                                 setActiveTab('suppliers');
-                                setEditingId(null);
-                                setAdding(false);
+                                setShowAddModal(false);
+                                setShowEditModal(false);
+                                setShowDeleteModal(false);
                                 setErrors({});
                             }}
                         >
@@ -360,6 +279,130 @@ export default function Index({ categories, brands, suppliers }) {
                 {activeTab === 'categories' && renderTable(categories, 'categories', 'Category')}
                 {activeTab === 'brands' && renderTable(brands, 'brands', 'Brand')}
                 {activeTab === 'suppliers' && renderTable(suppliers, 'suppliers', 'Supplier')}
+
+                {/* Add Modal */}
+                <div className={`modal fade ${showAddModal ? 'show' : ''}`} style={{ display: showAddModal ? 'block' : 'none' }} tabIndex="-1" role="dialog">
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Add New {currentType === 'categories' ? 'Category' : currentType === 'brands' ? 'Brand' : 'Supplier'}</h5>
+                                <button type="button" className="btn-close" onClick={handleCloseAddModal} disabled={loading}></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label htmlFor="newName" className="form-label">Name</label>
+                                    <input
+                                        type="text"
+                                        id="newName"
+                                        className={`form-control ${errors.newName ? 'is-invalid' : ''}`}
+                                        placeholder={`Enter ${currentType === 'categories' ? 'category' : currentType === 'brands' ? 'brand' : 'supplier'} name`}
+                                        value={newName}
+                                        onChange={e => {
+                                            setNewName(e.target.value);
+                                            setErrors({});
+                                        }}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleAdd();
+                                            }
+                                        }}
+                                        disabled={loading}
+                                        autoFocus
+                                    />
+                                    {errors.newName && (
+                                        <div className="invalid-feedback">
+                                            {errors.newName}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={handleCloseAddModal} disabled={loading}>
+                                    Cancel
+                                </button>
+                                <button type="button" className="btn btn-primary" onClick={handleAdd} disabled={loading || !newName.trim()}>
+                                    {loading ? 'Saving...' : 'Save'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {showAddModal && <div className="modal-backdrop fade show"></div>}
+
+                {/* Edit Modal */}
+                <div className={`modal fade ${showEditModal ? 'show' : ''}`} style={{ display: showEditModal ? 'block' : 'none' }} tabIndex="-1" role="dialog">
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Edit {currentType === 'categories' ? 'Category' : currentType === 'brands' ? 'Brand' : 'Supplier'}</h5>
+                                <button type="button" className="btn-close" onClick={handleCloseEditModal} disabled={loading}></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label htmlFor="editValue" className="form-label">Name</label>
+                                    <input
+                                        type="text"
+                                        id="editValue"
+                                        className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                                        value={editValue}
+                                        onChange={e => {
+                                            setEditValue(e.target.value);
+                                            setErrors({});
+                                        }}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleSaveEdit();
+                                            }
+                                        }}
+                                        disabled={loading}
+                                        autoFocus
+                                    />
+                                    {errors.name && (
+                                        <div className="invalid-feedback">
+                                            {errors.name}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={handleCloseEditModal} disabled={loading}>
+                                    Cancel
+                                </button>
+                                <button type="button" className="btn btn-primary" onClick={handleSaveEdit} disabled={loading || !editValue.trim()}>
+                                    {loading ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {showEditModal && <div className="modal-backdrop fade show"></div>}
+
+                {/* Delete Modal */}
+                <div className={`modal fade ${showDeleteModal ? 'show' : ''}`} style={{ display: showDeleteModal ? 'block' : 'none' }} tabIndex="-1" role="dialog">
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Delete</h5>
+                                <button type="button" className="btn-close" onClick={handleCloseDeleteModal} disabled={loading}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Are you sure you want to delete <strong>"{currentItem?.name}"</strong>?</p>
+                                <p className="text-danger mb-0">This action cannot be undone.</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={handleCloseDeleteModal} disabled={loading}>
+                                    Cancel
+                                </button>
+                                <button type="button" className="btn btn-danger" onClick={handleDelete} disabled={loading}>
+                                    {loading ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {showDeleteModal && <div className="modal-backdrop fade show"></div>}
             </div>
         </>
     );
