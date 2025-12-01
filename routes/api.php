@@ -20,3 +20,6 @@ Route::post('lookups/suppliers', [LookupController::class, 'storeSupplier'])->na
 Route::delete('lookups/categories/{id}', [LookupController::class, 'deleteCategory'])->name('lookups.categories.delete');
 Route::delete('lookups/brands/{id}', [LookupController::class, 'deleteBrand'])->name('lookups.brands.delete');
 Route::delete('lookups/suppliers/{id}', [LookupController::class, 'deleteSupplier'])->name('lookups.suppliers.delete');
+Route::put('lookups/categories/{id}', [LookupController::class, 'updateCategory'])->name('lookups.categories.update');
+Route::put('lookups/brands/{id}', [LookupController::class, 'updateBrand'])->name('lookups.brands.update');
+Route::put('lookups/suppliers/{id}', [LookupController::class, 'updateSupplier'])->name('lookups.suppliers.update');

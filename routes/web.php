@@ -12,6 +12,8 @@ Route::resource('assets', AssetController::class);
 Route::post('assets/{asset}', [AssetController::class, 'update'])->name('assets.update.post');
 Route::post('assets/{asset}/comments', [AssetController::class, 'addComment'])->name('assets.comments');
 
+Route::get('lookups', [\App\Http\Controllers\LookupController::class, 'index'])->name('lookups.index');
+
 // Route to serve private storage files (e.g., logo)
 Route::get('storage/private/{filename}', function ($filename) {
     $path = storage_path('app/private/' . $filename);

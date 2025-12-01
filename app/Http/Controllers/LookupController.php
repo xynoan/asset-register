@@ -9,9 +9,50 @@ use App\Models\Supplier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class LookupController extends Controller
 {
+    /**
+     * Display the lookup management page.
+     */
+    public function index(): Response
+    {
+        // Get all lookups with usage counts
+        $categories = AssetCategory::orderBy('name')->get()->map(function ($category) {
+            $usageCount = Asset::where('asset_category', $category->name)->count();
+            return [
+                'id' => $category->id,
+                'name' => $category->name,
+                'usage_count' => $usageCount,
+            ];
+        });
+
+        $brands = BrandManufacturer::orderBy('name')->get()->map(function ($brand) {
+            $usageCount = Asset::where('brand_manufacturer', $brand->name)->count();
+            return [
+                'id' => $brand->id,
+                'name' => $brand->name,
+                'usage_count' => $usageCount,
+            ];
+        });
+
+        $suppliers = Supplier::orderBy('name')->get()->map(function ($supplier) {
+            $usageCount = Asset::where('vendor_supplier', $supplier->name)->count();
+            return [
+                'id' => $supplier->id,
+                'name' => $supplier->name,
+                'usage_count' => $usageCount,
+            ];
+        });
+
+        return Inertia::render('Lookups/Index', [
+            'categories' => $categories,
+            'brands' => $brands,
+            'suppliers' => $suppliers,
+        ]);
+    }
     /**
      * Get all asset categories.
      */
@@ -222,6 +263,114 @@ class LookupController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Supplier deleted successfully'
+        ]);
+    }
+
+    /**
+     * Update an asset category.
+     */
+    public function updateCategory(Request $request, $id): JsonResponse
+    {
+        $category = AssetCategory::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:asset_categories,name,' . $id
+            ]
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $oldName = $category->name;
+        $category->update(['name' => $request->name]);
+
+        // Update all assets using this category
+        Asset::where('asset_category', $oldName)->update(['asset_category' => $request->name]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $category,
+            'message' => 'Category updated successfully'
+        ]);
+    }
+
+    /**
+     * Update a brand/manufacturer.
+     */
+    public function updateBrand(Request $request, $id): JsonResponse
+    {
+        $brand = BrandManufacturer::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:brands_manufacturers,name,' . $id
+            ]
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $oldName = $brand->name;
+        $brand->update(['name' => $request->name]);
+
+        // Update all assets using this brand
+        Asset::where('brand_manufacturer', $oldName)->update(['brand_manufacturer' => $request->name]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $brand,
+            'message' => 'Brand updated successfully'
+        ]);
+    }
+
+    /**
+     * Update a supplier.
+     */
+    public function updateSupplier(Request $request, $id): JsonResponse
+    {
+        $supplier = Supplier::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:suppliers,name,' . $id
+            ]
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $oldName = $supplier->name;
+        $supplier->update(['name' => $request->name]);
+
+        // Update all assets using this supplier
+        Asset::where('vendor_supplier', $oldName)->update(['vendor_supplier' => $request->name]);
+
+        return response()->json([
+            'success' => true,
+            'data' => $supplier,
+            'message' => 'Supplier updated successfully'
         ]);
     }
 }
