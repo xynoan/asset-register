@@ -8,7 +8,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 
 createInertiaApp({
-    title: (title) => `${title}`,
+    title: (title) => `${title} - Asset Register`,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.jsx`,
