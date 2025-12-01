@@ -99,14 +99,10 @@ export default function Index({ assets, flash }) {
                                     <th>Asset ID</th>
                                     <th>Category</th>
                                     <th>Brand / Manufacturer</th>
-                                    <th>Model Number</th>
-                                    <th>Serial Number</th>
                                     <th>Status</th>
                                     <th>Assigned To</th>
-                                    <th>Purchase Date</th>
                                     <th>Status Duration</th>
                                     <th>Last Modified</th>
-                                    <th>Attachments</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -131,8 +127,6 @@ export default function Index({ assets, flash }) {
                                             <td><strong>{asset.asset_id}</strong></td>
                                             <td>{asset.asset_category}</td>
                                             <td>{asset.brand_manufacturer}</td>
-                                            <td>{asset.model_number}</td>
-                                            <td>{asset.serial_number}</td>
                                             <td>
                                                 <span className={`badge ${getStatusBadgeClass(asset.status)}`}>
                                                     {asset.status}
@@ -147,7 +141,6 @@ export default function Index({ assets, flash }) {
                                                     )
                                                 }
                                             </td>
-                                            <td>{moment(asset.purchase_date).format('DD/MM/YYYY')}</td>
                                             <td>
                                                 <small className="text-muted">
                                                     {asset.status_duration_string || 'Unknown'}
@@ -155,7 +148,7 @@ export default function Index({ assets, flash }) {
                                             </td>
                                             <td>
                                                 <small className="text-muted">
-                                                    {asset.updated_at ? moment(asset.updated_at).format('DD/MM/YYYY HH:mm') : 'N/A'}
+                                                    {asset.updated_at ? moment(asset.updated_at).format('DD/MM/YYYY') : 'N/A'}
                                                     {asset.updater && (
                                                         <>
                                                             <br />
@@ -165,19 +158,6 @@ export default function Index({ assets, flash }) {
                                                         </>
                                                     )}
                                                 </small>
-                                            </td>
-                                            <td>
-                                                {asset.document_count > 0 ? (
-                                                    <Link
-                                                        href={route('assets.show', asset.id)}
-                                                        className="badge bg-info text-decoration-none"
-                                                        title="Click to view attachments"
-                                                    >
-                                                        📎 {asset.document_count}
-                                                    </Link>
-                                                ) : (
-                                                    <span className="text-muted">—</span>
-                                                )}
                                             </td>
                                             <td>
                                                 <Link
@@ -203,7 +183,7 @@ export default function Index({ assets, flash }) {
                                         </tr>
                                         {expandedRows[asset.id] && (
                                             <tr key={`${asset.id}-comment`}>
-                                                <td colSpan="13" className="bg-light">
+                                                <td colSpan="9" className="bg-light">
                                                     <div className="p-3">
                                                         {/* Parse and display assignment history */}
                                                         {(() => {
