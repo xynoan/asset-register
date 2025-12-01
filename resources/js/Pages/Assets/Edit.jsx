@@ -3,6 +3,7 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { getTodayLocalDate } from '../../utils/dateUtils';
+import Header from '@/Components/Header';
 
 export default function Edit({ asset, employees }) {
     const { auth } = usePage().props;
@@ -486,6 +487,7 @@ export default function Edit({ asset, employees }) {
     return (
         <>
             <Head title={`Edit Asset - ${asset.asset_id}`} />
+            <Header activePage="assets" />
             <div className="container mt-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Edit Asset</h1>

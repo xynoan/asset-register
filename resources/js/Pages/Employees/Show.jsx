@@ -1,10 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
 import moment from 'moment';
+import Header from '@/Components/Header';
 
 export default function Show({ employee }) {
     return (
         <>
             <Head title={`Employee - ${employee.full_name}`} />
+            <Header activePage="employees" />
             <div className="container mt-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Employee Details</h1>

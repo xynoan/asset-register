@@ -2,6 +2,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { getTodayLocalDate } from '../../utils/dateUtils';
+import Header from '@/Components/Header';
 
 export default function Create({ employees }) {
     const { auth } = usePage().props;
@@ -365,6 +366,7 @@ export default function Create({ employees }) {
     return (
         <>
             <Head title="Add New Asset" />
+            <Header activePage="assets" />
             <div className="container mt-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Add New Asset</h1>

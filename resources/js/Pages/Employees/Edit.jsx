@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import moment from 'moment';
+import Header from '@/Components/Header';
 
 export default function Edit({ employee }) {
     const { data, setData, put, processing, errors, reset } = useForm({
@@ -23,6 +24,7 @@ export default function Edit({ employee }) {
     return (
         <>
             <Head title={`Edit Employee - ${employee.full_name}`} />
+            <Header activePage="employees" />
             <div className="container mt-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Edit Employee</h1>

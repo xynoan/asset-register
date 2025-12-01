@@ -1,4 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import Header from '@/Components/Header';
 
 export default function Create() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -22,6 +23,7 @@ export default function Create() {
     return (
         <>
             <Head title="Add New Employee" />
+            <Header activePage="employees" />
             <div className="container mt-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Add New Employee</h1>
