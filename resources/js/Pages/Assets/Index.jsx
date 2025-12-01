@@ -1,6 +1,7 @@
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import moment from 'moment';
 import { useState } from 'react';
+import Header from '@/Components/Header';
 
 export default function Index({ assets, flash }) {
     const { delete: destroy, processing } = useForm();
@@ -68,26 +69,7 @@ export default function Index({ assets, flash }) {
     return (
         <>
             <Head title="Assets" />
-            <div class="container">
-                <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-
-                    <div class="col-md-3 mb-2 mb-md-0">
-                        <a href="#" class="d-inline-flex link-body-emphasis text-decoration-none">
-                            <img src={route('storage.private', 'kuga_corp_logo-removebg-preview.png')} alt="Logo" class="img-fluid" />
-                        </a>
-                    </div>
-
-                    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-                        <li><a href="#" class="nav-link px-2 link-secondary">Assets</a></li>
-                        <li><a href={route('employees.index')} class="nav-link px-2">Employees</a></li>
-                    </ul>
-
-                    <div class="col-md-3 text-end">
-                        <button type="button" class="btn btn-outline-primary me-2">Login</button>
-                    </div>
-
-                </header>
-            </div>
+            <Header activePage="assets" />
 
             <div className="container mt-5">
                 {flash?.success && (
@@ -99,7 +81,7 @@ export default function Index({ assets, flash }) {
 
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Assets</h1>
-                    <Link href={route('assets.create')} className="btn btn-primary">
+                    <Link href={route('assets.create')} className="btn btn-danger">
                         Add New Asset
                     </Link>
                 </div>
@@ -135,7 +117,7 @@ export default function Index({ assets, flash }) {
                                             <td>
                                                 <button
                                                     type="button"
-                                                    className="btn btn-sm btn-link p-0"
+                                                    className="btn btn-sm btn-link p-0 text-danger"
                                                     onClick={() => toggleRow(asset.id)}
                                                     title={expandedRows[asset.id] ? 'Hide comment' : hasComments(asset) ? 'View comments' : 'Add comment'}
                                                 >
@@ -345,7 +327,7 @@ export default function Index({ assets, flash }) {
                                                             </div>
                                                             <button
                                                                 type="submit"
-                                                                className="btn btn-sm btn-primary"
+                                                                className="btn btn-sm btn-danger"
                                                                 disabled={!commentInputs[asset.id]?.trim() || submitting[asset.id]}
                                                             >
                                                                 {submitting[asset.id] ? 'Submitting...' : 'Add Comment'}
@@ -381,7 +363,7 @@ export default function Index({ assets, flash }) {
                                         {link.url ? (
                                             <Link
                                                 href={link.url}
-                                                className="page-link"
+                                                className="page-link text-white bg-danger border-danger"
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />
                                         ) : (
