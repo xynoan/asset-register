@@ -13,6 +13,12 @@ export default function Login({ status, canResetPassword }) {
 
         post(route('login'), {
             onFinish: () => reset('password'),
+            onError: (errors) => {
+                console.error('Login errors:', errors);
+            },
+            onSuccess: () => {
+                console.log('Login successful');
+            },
         });
     };
 
@@ -225,7 +231,6 @@ export default function Login({ status, canResetPassword }) {
                 .form-check-input:checked {
                     background-color: #2563eb;
                     border-color: #2563eb;
-                }
                 }
 
                 .form-check-label {
