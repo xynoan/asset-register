@@ -7,6 +7,7 @@ export default function Edit({ employee }) {
         first_name: employee.full_name.split(' ')[0] || '',
         last_name: employee.full_name.split(' ').slice(1).join(' ') || '',
         birth_date: employee.birth_date,
+        status: employee.status || 'active',
     });
 
     const handleSubmit = (e) => {
@@ -102,6 +103,25 @@ export default function Edit({ employee }) {
                                 {errors.birth_date && (
                                     <div className="invalid-feedback">
                                         {errors.birth_date}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="status" className="form-label">Status</label>
+                                <select 
+                                    className={`form-select ${errors.status ? 'is-invalid' : ''}`}
+                                    id="status"
+                                    value={data.status}
+                                    onChange={e => setData('status', e.target.value)}
+                                    required
+                                >
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                                {errors.status && (
+                                    <div className="invalid-feedback">
+                                        {errors.status}
                                     </div>
                                 )}
                             </div>

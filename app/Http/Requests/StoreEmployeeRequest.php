@@ -25,6 +25,7 @@ class StoreEmployeeRequest extends FormRequest
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'birth_date' => ['required', 'date', 'before:today'],
+            'status' => ['required', 'string', 'in:active,inactive'],
         ];
     }
 
@@ -39,6 +40,7 @@ class StoreEmployeeRequest extends FormRequest
             'first_name' => 'first name',
             'last_name' => 'last name',
             'birth_date' => 'birth date',
+            'status' => 'status',
         ];
     }
 

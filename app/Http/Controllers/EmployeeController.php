@@ -61,7 +61,7 @@ class EmployeeController extends Controller
             'employee_no' => $employeeNo,
             'full_name' => $fullName,
             'birth_date' => $validated['birth_date'],
-            'status' => 'active',
+            'status' => $validated['status'],
             'created_by' => Auth::id() ?? 1,
             'updated_by' => Auth::id() ?? 1,
         ]);
@@ -120,6 +120,7 @@ class EmployeeController extends Controller
         $employee->update([
             'full_name' => $fullName,
             'birth_date' => $validated['birth_date'],
+            'status' => $validated['status'],
             'updated_by' => Auth::id() ?? 1,
         ]);
 
