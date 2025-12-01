@@ -137,7 +137,7 @@ export default function Login({ status, canResetPassword }) {
                     background: rgba(255, 255, 255, 0.95);
                     backdrop-filter: blur(10px);
                     border-radius: 20px;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
                     padding: 40px;
                     width: 100%;
                     max-width: 420px;
@@ -202,7 +202,7 @@ export default function Login({ status, canResetPassword }) {
                 .login-form .form-control:focus {
                     border-color: #667eea;
                     background-color: #fff;
-                    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                    box-shadow: 0 0 0 1px rgba(102, 126, 234, 0.1);
                     transform: translateY(-2px);
                 }
 
