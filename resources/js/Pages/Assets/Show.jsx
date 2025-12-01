@@ -129,7 +129,7 @@ export default function Show({ asset }) {
         <>
             <Head title={`Asset - ${asset.asset_id}`} />
             <Header activePage="assets" />
-            <div className="container mt-5">
+            <div className="container my-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Asset Details</h1>
                     <div>

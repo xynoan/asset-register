@@ -367,7 +367,7 @@ export default function Create({ employees }) {
         <>
             <Head title="Add New Asset" />
             <Header activePage="assets" />
-            <div className="container mt-5">
+            <div className="container my-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Add New Asset</h1>
                     <Link 
