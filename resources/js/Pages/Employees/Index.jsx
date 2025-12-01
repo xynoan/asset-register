@@ -25,7 +25,7 @@ export default function Index({ employees, flash }) {
 
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Employees</h1>
-                    <Link href={route('employees.create')} className="btn btn-primary">
+                    <Link href={route('employees.create')} className="btn btn-danger">
                         Add New Employee
                     </Link>
                 </div>
@@ -99,7 +99,7 @@ export default function Index({ employees, flash }) {
                                         {link.url ? (
                                             <Link
                                                 href={link.url}
-                                                className="page-link"
+                                                className="page-link text-white bg-danger border-danger"
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />
                                         ) : (
