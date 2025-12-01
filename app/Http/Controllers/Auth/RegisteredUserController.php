@@ -17,35 +17,27 @@ class RegisteredUserController extends Controller
 {
     /**
      * Display the registration view.
+     * Only accessible to admins.
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        // Registration is now handled by UserController for admins
+        // This route should redirect to user management
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return redirect()->route('users.create');
+        }
+
+        abort(403, 'Only administrators can register new users.');
     }
 
     /**
      * Handle an incoming registration request.
+     * This method is now disabled - registration is handled by UserController.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        event(new Registered($user));
-
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        abort(403, 'Public registration is disabled. Only administrators can create new users.');
     }
 }
