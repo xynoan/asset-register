@@ -1,6 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import moment from 'moment';
-import SectionNavigation from '@/Components/SectionNavigation';
 
 export default function Index({ employees, flash }) {
     const { delete: destroy, processing } = useForm();
@@ -14,6 +13,26 @@ export default function Index({ employees, flash }) {
     return (
         <>
             <Head title="Employees" />
+            <div class="container">
+                <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+
+                    <div class="col-md-3 mb-2 mb-md-0">
+                        <a href="#" class="d-inline-flex link-body-emphasis text-decoration-none">
+                            <img src={route('storage.private', 'kuga_corp_logo-removebg-preview.png')} alt="Logo" class="img-fluid" />
+                        </a>
+                    </div>
+
+                    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+                        <li><a href={route('assets.index')} class="nav-link px-2">Assets</a></li>
+                        <li><a href="#" class="nav-link px-2 link-secondary">Employees</a></li>
+                    </ul>
+
+                    <div class="col-md-3 text-end">
+                        <button type="button" class="btn btn-outline-primary me-2">Login</button>
+                    </div>
+
+                </header>
+            </div>
             <div className="container mt-5">
                 {flash?.success && (
                     <div className="alert alert-success alert-dismissible fade show" role="alert">
@@ -21,8 +40,6 @@ export default function Index({ employees, flash }) {
                         <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 )}
-                
-                <SectionNavigation />
 
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Employees</h1>
@@ -53,27 +70,27 @@ export default function Index({ employees, flash }) {
                                     <tr key={employee.id}>
                                         <td>{employee.employee_no}</td>
                                         <td>{employee.full_name}</td>
-                                    <td>{moment(employee.birth_date).format('DD/MM/YYYY')}</td>
+                                        <td>{moment(employee.birth_date).format('DD/MM/YYYY')}</td>
                                         <td>
                                             <span className={`badge ${employee.status === 'active' ? 'bg-success' : 'bg-secondary'}`}>
                                                 {employee.status}
                                             </span>
                                         </td>
-                                    <td>{moment(employee.created_at).format('DD/MM/YYYY')}</td>
+                                        <td>{moment(employee.created_at).format('DD/MM/YYYY')}</td>
                                         <td>
-                                            <Link 
-                                                href={route('employees.show', employee.id)} 
+                                            <Link
+                                                href={route('employees.show', employee.id)}
                                                 className="btn btn-sm btn-outline-primary me-2"
                                             >
                                                 View
                                             </Link>
-                                            <Link 
-                                                href={route('employees.edit', employee.id)} 
+                                            <Link
+                                                href={route('employees.edit', employee.id)}
                                                 className="btn btn-sm btn-outline-secondary me-2"
                                             >
                                                 Edit
                                             </Link>
-                                            <button 
+                                            <button
                                                 onClick={() => handleDelete(employee.id, employee.full_name)}
                                                 className="btn btn-sm btn-outline-danger"
                                                 disabled={processing}
