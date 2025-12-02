@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Response;
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [AssetController::class, 'dashboard'])->name('dashboard');
     
-    Route::resource('employees', EmployeeController::class);
+    Route::resource('employees', EmployeeController::class)
+        ->middleware(\App\Http\Middleware\BlockEncoderAccess::class);
     Route::resource('assets', AssetController::class);
     
     Route::post('assets/{asset}', [AssetController::class, 'update'])->name('assets.update.post');
