@@ -1,9 +1,10 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import moment from 'moment';
 import Header from '@/Components/Header';
 
 export default function Index({ employees, flash }) {
     const { delete: destroy, processing } = useForm();
+    const user = usePage().props?.auth?.user;
 
     const handleDelete = (employeeId, employeeName) => {
         if (confirm(`Are you sure you want to delete employee "${employeeName}"? This action cannot be undone.`)) {
@@ -72,13 +73,15 @@ export default function Index({ employees, flash }) {
                                             >
                                                 Edit
                                             </Link>
-                                            <button
-                                                onClick={() => handleDelete(employee.id, employee.full_name)}
-                                                className="btn btn-sm btn-outline-danger"
-                                                disabled={processing}
-                                            >
-                                                Delete
-                                            </button>
+                                            {user?.role !== 'encoder' && (
+                                                <button
+                                                    onClick={() => handleDelete(employee.id, employee.full_name)}
+                                                    className="btn btn-sm btn-outline-danger"
+                                                    disabled={processing}
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

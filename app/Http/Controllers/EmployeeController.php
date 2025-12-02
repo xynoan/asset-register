@@ -141,6 +141,17 @@ class EmployeeController extends Controller
      */
     public function destroy(Request $request, Employee $employee)
     {
+        // Prevent encoders from deleting employees
+        if ($request->user() && $request->user()->isEncoder()) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Encoder access is not allowed for delete operations.'
+                ], 403);
+            }
+            abort(403, 'Unauthorized. Encoder access is not allowed for delete operations.');
+        }
+
         $employee->delete(); // This will set deleted_at timestamp
 
         if ($request->expectsJson() || $request->is('api/*')) {

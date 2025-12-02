@@ -21,16 +21,14 @@ export default function Header({ activePage = 'assets' }) {
                             Assets
                         </Link>
                     </li>
-                    {user?.role !== 'encoder' && (
-                        <li>
-                            <Link 
-                                href={route('employees.index')} 
-                                className={`nav-link px-2 ${activePage === 'employees' ? 'link-secondary' : 'text-danger'}`}
-                            >
-                                Employees
-                            </Link>
-                        </li>
-                    )}
+                    <li>
+                        <Link 
+                            href={route('employees.index')} 
+                            className={`nav-link px-2 ${activePage === 'employees' ? 'link-secondary' : 'text-danger'}`}
+                        >
+                            Employees
+                        </Link>
+                    </li>
                     {user?.role === 'admin' && (
                         <>
                             <li>
