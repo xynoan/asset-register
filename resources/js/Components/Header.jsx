@@ -54,7 +54,7 @@ export default function Header({ activePage = 'assets' }) {
                 <div className="col-md-3 text-end">
                     {user ? (
                         <div className="d-flex align-items-center justify-content-end">
-                            <span className="me-3 text-danger">
+                            <span className="me-3 text-secondary-emphasis">
                                 Hello, <span className="fw-semibold">{user.name || 'Admin'}</span>!
                             </span>
                             <button
