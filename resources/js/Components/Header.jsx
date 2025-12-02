@@ -16,7 +16,7 @@ export default function Header({ activePage = 'assets' }) {
                     <li>
                         <Link 
                             href={route('assets.index')} 
-                            className={`nav-link px-2 ${activePage === 'assets' ? 'link-secondary' : 'text-danger'}`}
+                            className={`nav-link px-2 ${activePage === 'assets' ? 'text-danger' : 'text-secondary'}`}
                         >
                             Assets
                         </Link>
@@ -24,7 +24,7 @@ export default function Header({ activePage = 'assets' }) {
                     <li>
                         <Link 
                             href={route('employees.index')} 
-                            className={`nav-link px-2 ${activePage === 'employees' ? 'link-secondary' : 'text-danger'}`}
+                            className={`nav-link px-2 ${activePage === 'employees' ? 'text-danger' : 'text-secondary'}`}
                         >
                             Employees
                         </Link>
@@ -34,7 +34,7 @@ export default function Header({ activePage = 'assets' }) {
                             <li>
                                 <Link 
                                     href={route('users.index')} 
-                                    className={`nav-link px-2 ${activePage === 'users' ? 'link-secondary' : 'text-danger'}`}
+                                    className={`nav-link px-2 ${activePage === 'users' ? 'text-danger' : 'text-secondary'}`}
                                 >
                                     Users
                                 </Link>
@@ -42,7 +42,7 @@ export default function Header({ activePage = 'assets' }) {
                             <li>
                                 <Link 
                                     href={route('lookups.index')} 
-                                    className={`nav-link px-2 ${activePage === 'lookups' ? 'link-secondary' : 'text-danger'}`}
+                                    className={`nav-link px-2 ${activePage === 'lookups' ? 'text-danger' : 'text-secondary'}`}
                                 >
                                     Lookups
                                 </Link>

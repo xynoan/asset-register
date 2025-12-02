@@ -1,10 +1,10 @@
 /* Header Navigation Hover Effects */
-.nav-link:not(.link-secondary) {
+.nav-link:not(.link-danger) {
     transition: all 0.3s ease;
     position: relative;
 }
 
-.nav-link:not(.link-secondary)::after {
+.nav-link:not(.link-danger)::after {
     content: '';
     position: absolute;
     width: 0;
@@ -16,6 +16,6 @@
     transform: translateX(-50%);
 }
 
-.nav-link:not(.link-secondary):hover::after {
+.nav-link:not(.link-danger):hover::after {
     width: 80%;
 }
