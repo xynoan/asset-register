@@ -1,4 +1,4 @@
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 
 export default function Header({ activePage = 'assets' }) {
     const user = usePage().props?.auth?.user;
@@ -57,15 +57,15 @@ export default function Header({ activePage = 'assets' }) {
                             <span className="me-3 text-danger">
                                 Hello, <span className="fw-semibold">{user.name || 'Admin'}</span>!
                             </span>
-                            <Link
-                                as="button"
-                                method="post"
-                                href={route('logout')}
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    router.post(route('logout'));
+                                }}
                                 className="btn btn-danger"
-                                preserveScroll
                             >
                                 Logout
-                            </Link>
+                            </button>
                         </div>
                     ) : (
                         <Link

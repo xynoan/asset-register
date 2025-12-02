@@ -15,7 +15,9 @@ Route::middleware('auth')->group(function () {
     Route::post('assets/{asset}', [AssetController::class, 'update'])->name('assets.update.post');
     Route::post('assets/{asset}/comments', [AssetController::class, 'addComment'])->name('assets.comments');
     
-    Route::get('lookups', [\App\Http\Controllers\LookupController::class, 'index'])->name('lookups.index');
+    Route::get('lookups', [\App\Http\Controllers\LookupController::class, 'index'])
+        ->middleware(\App\Http\Middleware\EnsureUserIsAdmin::class)
+        ->name('lookups.index');
     
     // User management routes (admin only)
     Route::middleware(\App\Http\Middleware\EnsureUserIsAdmin::class)->group(function () {
