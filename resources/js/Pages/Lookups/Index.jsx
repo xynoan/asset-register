@@ -321,7 +321,7 @@ export default function Index({ categories, brands, suppliers }) {
                                 <button type="button" className="btn btn-secondary" onClick={handleCloseAddModal} disabled={loading}>
                                     Cancel
                                 </button>
-                                <button type="button" className="btn btn-primary" onClick={handleAdd} disabled={loading || !newName.trim()}>
+                                <button type="button" className="btn btn-success" onClick={handleAdd} disabled={loading || !newName.trim()}>
                                     {loading ? 'Saving...' : 'Save'}
                                 </button>
                             </div>

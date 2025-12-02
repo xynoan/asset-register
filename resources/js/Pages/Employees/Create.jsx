@@ -120,7 +120,7 @@ export default function Create() {
                             <div className="d-flex justify-content-between">
                                 <button 
                                     type="submit" 
-                                    className="btn btn-primary"
+                                    className="btn btn-success"
                                     disabled={processing}
                                 >
                                     {processing ? 'Creating...' : 'Create Employee'}

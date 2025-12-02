@@ -137,7 +137,7 @@ export default function Edit({ user }) {
                             <div className="d-flex justify-content-between">
                                 <button 
                                     type="submit" 
-                                    className="btn btn-primary"
+                                    className="btn btn-success"
                                     disabled={processing}
                                 >
                                     {processing ? 'Updating...' : 'Update User'}
