@@ -77,7 +77,7 @@ export default function Index({ users, flash }) {
                                         <td>
                                             <Link
                                                 href={route('users.edit', user.id)}
-                                                className="btn btn-sm btn-outline-secondary me-2"
+                                                className="btn btn-sm btn-outline-primary me-2"
                                             >
                                                 Edit
                                             </Link>

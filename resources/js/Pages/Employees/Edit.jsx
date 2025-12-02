@@ -32,7 +32,7 @@ export default function Edit({ employee }) {
                     <div>
                         <Link 
                             href={route('employees.show', employee.id)} 
-                            className="btn btn-outline-secondary me-2"
+                            className="btn btn-outline-primary me-2"
                         >
                             View Employee
                         </Link>
@@ -47,7 +47,7 @@ export default function Edit({ employee }) {
 
                 <div className="card">
                     <div className="card-header">
-                        <h5 className="card-title mb-0">Update Employee Information</h5>
+                        <h5 className="card-title mb-0">Employee ID: {employee.employee_no}</h5>
                     </div>
                     <div className="card-body">
                         <form onSubmit={handleSubmit}>
@@ -129,14 +129,14 @@ export default function Edit({ employee }) {
                             <div className="d-flex justify-content-between">
                                 <button 
                                     type="submit" 
-                                    className="btn btn-primary"
+                                    className="btn btn-success"
                                     disabled={processing}
                                 >
                                     {processing ? 'Updating...' : 'Update Employee'}
                                 </button>
                                 <button 
                                     type="button" 
-                                    className="btn btn-outline-secondary"
+                                    className="btn btn-outline-danger"
                                     onClick={() => reset()}
                                 >
                                     Reset

@@ -63,13 +63,13 @@ export default function Index({ employees, flash }) {
                                         <td>
                                             <Link
                                                 href={route('employees.show', employee.id)}
-                                                className="btn btn-sm btn-outline-primary me-2"
+                                                className="btn btn-sm btn-outline-success me-2"
                                             >
                                                 View
                                             </Link>
                                             <Link
                                                 href={route('employees.edit', employee.id)}
-                                                className="btn btn-sm btn-outline-secondary me-2"
+                                                className="btn btn-sm btn-outline-primary me-2"
                                             >
                                                 Edit
                                             </Link>

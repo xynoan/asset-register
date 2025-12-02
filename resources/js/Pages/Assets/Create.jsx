@@ -683,7 +683,7 @@ export default function Create({ employees }) {
                                 </button>
                                 <button 
                                     type="button" 
-                                    className="btn btn-outline-secondary"
+                                    className="btn btn-outline-danger"
                                     onClick={() => reset()}
                                 >
                                     Reset

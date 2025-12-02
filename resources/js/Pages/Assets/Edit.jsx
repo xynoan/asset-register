@@ -305,7 +305,7 @@ export default function Edit({ asset, employees }) {
                     <div>
                         <Link
                             href={route('assets.show', asset.id)}
-                            className="btn btn-outline-secondary me-2"
+                            className="btn btn-outline-primary me-2"
                         >
                             View Asset
                         </Link>
@@ -835,14 +835,14 @@ export default function Edit({ asset, employees }) {
                             <div className="d-flex justify-content-between">
                                 <button
                                     type="submit"
-                                    className="btn btn-primary"
+                                    className="btn btn-success"
                                     disabled={processing}
                                 >
                                     {processing ? 'Updating...' : 'Update Asset'}
                                 </button>
                                 <button
                                     type="button"
-                                    className="btn btn-outline-secondary"
+                                    className="btn btn-outline-danger"
                                     onClick={() => reset()}
                                 >
                                     Reset

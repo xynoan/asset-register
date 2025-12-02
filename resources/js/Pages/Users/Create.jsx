@@ -139,14 +139,14 @@ export default function Create() {
                             <div className="d-flex justify-content-between">
                                 <button 
                                     type="submit" 
-                                    className="btn btn-primary"
+                                    className="btn btn-success"
                                     disabled={processing}
                                 >
                                     {processing ? 'Creating...' : 'Create User'}
                                 </button>
                                 <button 
                                     type="button" 
-                                    className="btn btn-outline-secondary"
+                                    className="btn btn-outline-danger"
                                     onClick={() => reset()}
                                 >
                                     Reset

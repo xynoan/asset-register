@@ -162,13 +162,13 @@ export default function Index({ assets, flash }) {
                                             <td>
                                                 <Link
                                                     href={route('assets.show', asset.id)}
-                                                    className="btn btn-sm btn-outline-primary me-2 my-1"
+                                                    className="btn btn-sm btn-outline-success me-2 my-1"
                                                 >
                                                     View
                                                 </Link>
                                                 <Link
                                                     href={route('assets.edit', asset.id)}
-                                                    className="btn btn-sm btn-outline-secondary me-2 my-1"
+                                                    className="btn btn-sm btn-outline-primary me-2 my-1"
                                                 >
                                                     Edit
                                                 </Link>
