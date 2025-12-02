@@ -29,14 +29,26 @@ export default function Header({ activePage = 'assets' }) {
                             Employees
                         </Link>
                     </li>
-                    <li>
-                        <Link 
-                            href={route('lookups.index')} 
-                            className={`nav-link px-2 ${activePage === 'lookups' ? 'link-secondary' : 'text-danger'}`}
-                        >
-                            Lookups
-                        </Link>
-                    </li>
+                    {user?.role === 'admin' && (
+                        <>
+                            <li>
+                                <Link 
+                                    href={route('users.index')} 
+                                    className={`nav-link px-2 ${activePage === 'users' ? 'link-secondary' : 'text-danger'}`}
+                                >
+                                    Users
+                                </Link>
+                            </li>
+                            <li>
+                                <Link 
+                                    href={route('lookups.index')} 
+                                    className={`nav-link px-2 ${activePage === 'lookups' ? 'link-secondary' : 'text-danger'}`}
+                                >
+                                    Lookups
+                                </Link>
+                            </li>
+                        </>
+                    )}
                 </ul>
 
                 <div className="col-md-3 text-end">
