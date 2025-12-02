@@ -495,6 +495,11 @@ class AssetController extends Controller
      */
     public function destroy(Request $request, Asset $asset)
     {
+        // Block encoders from deleting assets
+        if ($request->user() && $request->user()->isEncoder()) {
+            abort(403, 'Unauthorized. Encoders are not allowed to delete assets.');
+        }
+
         $asset->delete(); // This will set deleted_at timestamp
 
         if ($request->expectsJson() || $request->is('api/*')) {

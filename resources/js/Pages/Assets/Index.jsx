@@ -172,13 +172,15 @@ export default function Index({ assets, flash }) {
                                                 >
                                                     Edit
                                                 </Link>
-                                                <button
-                                                    onClick={() => handleDelete(asset.id, asset.asset_id)}
-                                                    className="btn btn-sm btn-outline-danger my-1"
-                                                    disabled={processing}
-                                                >
-                                                    Delete
-                                                </button>
+                                                {auth?.user?.role !== 'encoder' && (
+                                                    <button
+                                                        onClick={() => handleDelete(asset.id, asset.asset_id)}
+                                                        className="btn btn-sm btn-outline-danger my-1"
+                                                        disabled={processing}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                         {expandedRows[asset.id] && (
