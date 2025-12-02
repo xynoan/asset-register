@@ -1,6 +1,8 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 export default function Header({ activePage = 'assets' }) {
+    const user = usePage().props?.auth?.user;
+
     return (
         <div className="container">
             <header className="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
@@ -38,7 +40,30 @@ export default function Header({ activePage = 'assets' }) {
                 </ul>
 
                 <div className="col-md-3 text-end">
-                    <button type="button" className="btn btn-outline-danger me-2" style={{ cursor: 'pointer' }}>Login</button>
+                    {user ? (
+                        <div className="d-flex align-items-center justify-content-end">
+                            <span className="me-3 text-danger">
+                                Hello, <span className="fw-semibold">{user.name || 'Admin'}</span>!
+                            </span>
+                            <Link
+                                as="button"
+                                method="post"
+                                href={route('logout')}
+                                className="btn btn-danger"
+                                preserveScroll
+                            >
+                                Logout
+                            </Link>
+                        </div>
+                    ) : (
+                        <Link
+                            href={route('login')}
+                            className="btn btn-outline-danger me-2"
+                            style={{ cursor: 'pointer' }}
+                        >
+                            Login
+                        </Link>
+                    )}
                 </div>
             </header>
         </div>
