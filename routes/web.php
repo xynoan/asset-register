@@ -9,11 +9,50 @@ use Illuminate\Support\Facades\Response;
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', [AssetController::class, 'dashboard'])->name('dashboard');
     
-    Route::resource('employees', EmployeeController::class);
-    Route::resource('assets', AssetController::class);
+    // Employee routes - view only for users
+    Route::get('employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('employees/create', [EmployeeController::class, 'create'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('employees.create');
+    Route::post('employees', [EmployeeController::class, 'store'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('employees.store');
+    Route::get('employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
+    Route::get('employees/{employee}/edit', [EmployeeController::class, 'edit'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('employees.edit');
+    Route::put('employees/{employee}', [EmployeeController::class, 'update'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('employees.update');
+    Route::delete('employees/{employee}', [EmployeeController::class, 'destroy'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('employees.destroy');
     
-    Route::post('assets/{asset}', [AssetController::class, 'update'])->name('assets.update.post');
-    Route::post('assets/{asset}/comments', [AssetController::class, 'addComment'])->name('assets.comments');
+    // Asset routes - view only for users
+    Route::get('assets', [AssetController::class, 'index'])->name('assets.index');
+    Route::get('assets/create', [AssetController::class, 'create'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('assets.create');
+    Route::post('assets', [AssetController::class, 'store'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('assets.store');
+    Route::get('assets/{asset}', [AssetController::class, 'show'])->name('assets.show');
+    Route::get('assets/{asset}/edit', [AssetController::class, 'edit'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('assets.edit');
+    Route::put('assets/{asset}', [AssetController::class, 'update'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('assets.update');
+    Route::delete('assets/{asset}', [AssetController::class, 'destroy'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('assets.destroy');
+    
+    Route::post('assets/{asset}', [AssetController::class, 'update'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('assets.update.post');
+    Route::post('assets/{asset}/comments', [AssetController::class, 'addComment'])
+        ->middleware(\App\Http\Middleware\BlockUserModifications::class)
+        ->name('assets.comments');
     
     Route::get('lookups', [\App\Http\Controllers\LookupController::class, 'index'])
         ->middleware(\App\Http\Middleware\EnsureUserIsAdmin::class)

@@ -1,8 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import moment from 'moment';
 import Header from '@/Components/Header';
 
 export default function Show({ asset }) {
+    const { auth } = usePage().props;
     const getStatusBadgeClass = (status) => {
         const statusClasses = {
             'In-use': 'bg-success',
@@ -133,12 +134,14 @@ export default function Show({ asset }) {
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Asset Details</h1>
                     <div>
-                        <Link
-                            href={route('assets.edit', asset.id)}
-                            className="btn btn-outline-primary me-2"
-                        >
-                            Edit Asset
-                        </Link>
+                        {auth?.user?.role !== 'user' && (
+                            <Link
+                                href={route('assets.edit', asset.id)}
+                                className="btn btn-outline-primary me-2"
+                            >
+                                Edit Asset
+                            </Link>
+                        )}
                         <Link
                             href={route('assets.index')}
                             className="btn btn-secondary"

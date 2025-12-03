@@ -26,14 +26,19 @@ export default function Index({ employees, flash }) {
 
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Employees</h1>
-                    <Link href={route('employees.create')} className="btn btn-danger">
-                        Add New Employee
-                    </Link>
+                    {user?.role !== 'user' && (
+                        <Link href={route('employees.create')} className="btn btn-danger">
+                            Add New Employee
+                        </Link>
+                    )}
                 </div>
 
                 {employees.data.length === 0 ? (
                     <div className="alert alert-info">
-                        No employees found. <Link href={route('employees.create')}>Add the first employee</Link>.
+                        No employees found.
+                        {user?.role !== 'user' && (
+                            <> <Link href={route('employees.create')}>Add the first employee</Link>.</>
+                        )}
                     </div>
                 ) : (
                     <div className="table-responsive">
@@ -67,20 +72,24 @@ export default function Index({ employees, flash }) {
                                             >
                                                 View
                                             </Link>
-                                            <Link
-                                                href={route('employees.edit', employee.id)}
-                                                className="btn btn-sm btn-outline-primary me-2"
-                                            >
-                                                Edit
-                                            </Link>
-                                            {user?.role !== 'encoder' && (
-                                                <button
-                                                    onClick={() => handleDelete(employee.id, employee.full_name)}
-                                                    className="btn btn-sm btn-outline-danger"
-                                                    disabled={processing}
-                                                >
-                                                    Delete
-                                                </button>
+                                            {user?.role !== 'user' && (
+                                                <>
+                                                    <Link
+                                                        href={route('employees.edit', employee.id)}
+                                                        className="btn btn-sm btn-outline-primary me-2"
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                    {user?.role !== 'encoder' && (
+                                                        <button
+                                                            onClick={() => handleDelete(employee.id, employee.full_name)}
+                                                            className="btn btn-sm btn-outline-danger"
+                                                            disabled={processing}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    )}
+                                                </>
                                             )}
                                         </td>
                                     </tr>

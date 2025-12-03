@@ -81,14 +81,19 @@ export default function Index({ assets, flash }) {
 
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Assets</h1>
-                    <Link href={route('assets.create')} className="btn btn-danger">
-                        Add New Asset
-                    </Link>
+                    {auth?.user?.role !== 'user' && (
+                        <Link href={route('assets.create')} className="btn btn-danger">
+                            Add New Asset
+                        </Link>
+                    )}
                 </div>
 
                 {assets.data.length === 0 ? (
                     <div className="alert alert-info">
-                        No assets found. <Link href={route('assets.create')}>Add the first asset</Link>.
+                        No assets found.
+                        {auth?.user?.role !== 'user' && (
+                            <> <Link href={route('assets.create')}>Add the first asset</Link>.</>
+                        )}
                     </div>
                 ) : (
                     <div className="table-responsive">
@@ -166,20 +171,24 @@ export default function Index({ assets, flash }) {
                                                 >
                                                     View
                                                 </Link>
-                                                <Link
-                                                    href={route('assets.edit', asset.id)}
-                                                    className="btn btn-sm btn-outline-primary me-2 my-1"
-                                                >
-                                                    Edit
-                                                </Link>
-                                                {auth?.user?.role !== 'encoder' && (
-                                                    <button
-                                                        onClick={() => handleDelete(asset.id, asset.asset_id)}
-                                                        className="btn btn-sm btn-outline-danger my-1"
-                                                        disabled={processing}
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                {auth?.user?.role !== 'user' && (
+                                                    <>
+                                                        <Link
+                                                            href={route('assets.edit', asset.id)}
+                                                            className="btn btn-sm btn-outline-primary me-2 my-1"
+                                                        >
+                                                            Edit
+                                                        </Link>
+                                                        {auth?.user?.role !== 'encoder' && (
+                                                            <button
+                                                                onClick={() => handleDelete(asset.id, asset.asset_id)}
+                                                                className="btn btn-sm btn-outline-danger my-1"
+                                                                disabled={processing}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        )}
+                                                    </>
                                                 )}
                                             </td>
                                         </tr>
@@ -293,35 +302,39 @@ export default function Index({ assets, flash }) {
                                                             ) : null;
                                                         })()}
 
-                                                        <h6 className="mb-2">Add Comment</h6>
-                                                        <form onSubmit={(e) => handleCommentSubmit(asset.id, e)}>
-                                                            <div className="mb-2">
-                                                                <textarea
-                                                                    className="form-control"
-                                                                    rows="2"
-                                                                    placeholder="Enter your comment..."
-                                                                    value={commentInputs[asset.id] || ''}
-                                                                    onChange={(e) => handleCommentChange(asset.id, e.target.value)}
-                                                                />
-                                                                <small className="text-muted">
-                                                                    Comment will be attributed to: {auth?.user?.name || 'System'}
-                                                                </small>
-                                                            </div>
-                                                            <button
-                                                                type="submit"
-                                                                className="btn btn-sm btn-danger"
-                                                                disabled={!commentInputs[asset.id]?.trim() || submitting[asset.id]}
-                                                            >
-                                                                {submitting[asset.id] ? 'Submitting...' : 'Add Comment'}
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-sm btn-secondary ms-2"
-                                                                onClick={() => toggleRow(asset.id)}
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                        </form>
+                                                        {auth?.user?.role !== 'user' && (
+                                                            <>
+                                                                <h6 className="mb-2">Add Comment</h6>
+                                                                <form onSubmit={(e) => handleCommentSubmit(asset.id, e)}>
+                                                                    <div className="mb-2">
+                                                                        <textarea
+                                                                            className="form-control"
+                                                                            rows="2"
+                                                                            placeholder="Enter your comment..."
+                                                                            value={commentInputs[asset.id] || ''}
+                                                                            onChange={(e) => handleCommentChange(asset.id, e.target.value)}
+                                                                        />
+                                                                        <small className="text-muted">
+                                                                            Comment will be attributed to: {auth?.user?.name || 'System'}
+                                                                        </small>
+                                                                    </div>
+                                                                    <button
+                                                                        type="submit"
+                                                                        className="btn btn-sm btn-danger"
+                                                                        disabled={!commentInputs[asset.id]?.trim() || submitting[asset.id]}
+                                                                    >
+                                                                        {submitting[asset.id] ? 'Submitting...' : 'Add Comment'}
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-sm btn-secondary ms-2"
+                                                                        onClick={() => toggleRow(asset.id)}
+                                                                    >
+                                                                        Cancel
+                                                                    </button>
+                                                                </form>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>

@@ -1,8 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import moment from 'moment';
 import Header from '@/Components/Header';
 
 export default function Show({ employee }) {
+    const { auth } = usePage().props;
     return (
         <>
             <Head title={`Employee - ${employee.full_name}`} />
@@ -11,12 +12,14 @@ export default function Show({ employee }) {
                 <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1>Employee Details</h1>
                     <div>
-                        <Link 
-                            href={route('employees.edit', employee.id)} 
-                            className="btn btn-outline-primary me-2"
-                        >
-                            Edit Employee
-                        </Link>
+                        {auth?.user?.role !== 'user' && (
+                            <Link 
+                                href={route('employees.edit', employee.id)} 
+                                className="btn btn-outline-primary me-2"
+                            >
+                                Edit Employee
+                            </Link>
+                        )}
                         <Link 
                             href={route('employees.index')} 
                             className="btn btn-secondary"
