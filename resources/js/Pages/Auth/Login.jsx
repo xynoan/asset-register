@@ -1,5 +1,5 @@
-import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useEffect, useRef } from 'react';
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -7,6 +7,34 @@ export default function Login({ status, canResetPassword }) {
         password: '',
         remember: false,
     });
+    const alertPlaceholderRef = useRef(null);
+
+    const showAlert = (message, type = 'danger') => {
+        const alertPlaceholder = alertPlaceholderRef.current;
+        if (!alertPlaceholder) return;
+
+        // Clear any existing alerts
+        alertPlaceholder.innerHTML = '';
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = [
+            `<div class="alert alert-${type} alert-dismissible fade show" role="alert">`,
+            `   ${message}`,
+            '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+            '</div>'
+        ].join('');
+
+        alertPlaceholder.append(wrapper);
+    };
+
+    useEffect(() => {
+        // Show error alert when errors occur
+        if (errors.email) {
+            showAlert(errors.email, 'danger');
+        } else if (errors.password) {
+            showAlert(errors.password, 'danger');
+        }
+    }, [errors.email, errors.password]);
 
     const submit = (e) => {
         e.preventDefault();
@@ -37,9 +65,12 @@ export default function Login({ status, canResetPassword }) {
                         <p className="login-subtitle">Please sign in to your account</p>
                     </div>
 
+                    <div id="liveAlertPlaceholder" ref={alertPlaceholderRef}></div>
+
                     {status && (
                         <div className="alert alert-success alert-dismissible fade show" role="alert">
                             {status}
+                            <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     )}
 
@@ -56,7 +87,6 @@ export default function Login({ status, canResetPassword }) {
                                 required
                             />
                             <label htmlFor="floatingInput">Email address</label>
-                            <InputError message={errors.email} className="mt-2" />
                         </div>
 
                         <div className="form-floating mb-3">
@@ -71,7 +101,6 @@ export default function Login({ status, canResetPassword }) {
                                 required
                             />
                             <label htmlFor="floatingPassword">Password</label>
-                            <InputError message={errors.password} className="mt-2" />
                         </div>
 
                         <div className="d-flex justify-content-between align-items-center mb-4">
