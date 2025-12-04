@@ -125,7 +125,7 @@ export default function Index({ assets, flash }) {
                                                     {expandedRows[asset.id] ? (
                                                         <i className="fas fa-chevron-down"></i>
                                                     ) : (
-                                                        <i className={hasComments(asset) ? "fas fa-comment text-primary" : "far fa-comment"}></i>
+                                                        <i className={hasComments(asset) ? "fas fa-comment text-danger" : "far fa-comment"}></i>
                                                     )}
                                                 </button>
                                             </td>
