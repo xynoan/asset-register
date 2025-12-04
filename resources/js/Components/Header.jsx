@@ -1,7 +1,10 @@
-import { Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { Link, usePage } from '@inertiajs/react';
+import LogoutModal from './LogoutModal';
 
 export default function Header({ activePage = 'assets' }) {
     const user = usePage().props?.auth?.user;
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     return (
         <div className="container">
@@ -60,7 +63,7 @@ export default function Header({ activePage = 'assets' }) {
                             <button
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    router.post(route('logout'));
+                                    setShowLogoutModal(true);
                                 }}
                                 className="btn btn-danger"
                             >
@@ -78,6 +81,11 @@ export default function Header({ activePage = 'assets' }) {
                     )}
                 </div>
             </header>
+
+            <LogoutModal 
+                show={showLogoutModal} 
+                onClose={() => setShowLogoutModal(false)} 
+            />
         </div>
     );
 }
