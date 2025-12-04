@@ -216,68 +216,6 @@ export default function Index({ assets, flash }) {
                                             <tr key={`${asset.id}-comment`}>
                                                 <td colSpan={auth?.user?.role === 'admin' ? 9 : 8} className="bg-light">
                                                     <div className="p-3">
-                                                        {/* Parse and display assignment history */}
-                                                        {(() => {
-                                                            let assignmentHistory = [];
-                                                            if (asset.assignment_history) {
-                                                                if (Array.isArray(asset.assignment_history)) {
-                                                                    assignmentHistory = asset.assignment_history;
-                                                                } else if (typeof asset.assignment_history === 'string') {
-                                                                    try {
-                                                                        const parsed = JSON.parse(asset.assignment_history);
-                                                                        assignmentHistory = Array.isArray(parsed) ? parsed : [];
-                                                                    } catch (e) {
-                                                                        assignmentHistory = [];
-                                                                    }
-                                                                }
-                                                            }
-                                                            // Reverse to show newest assignments first
-                                                            const reversedAssignments = [...assignmentHistory].reverse();
-                                                            return reversedAssignments.length > 0 ? (
-                                                                <div className="mb-3">
-                                                                    <h6 className="mb-2">Assignment History</h6>
-                                                                    <div className="table-responsive">
-                                                                        <table className="table table-bordered table-sm mb-3">
-                                                                            <thead className="table-light">
-                                                                                <tr>
-                                                                                    <th style={{ width: '15%' }}>Date & Time</th>
-                                                                                    <th style={{ width: '20%' }}>Assigned To</th>
-                                                                                    <th style={{ width: '15%' }}>Employee No</th>
-                                                                                    <th style={{ width: '20%' }}>Status</th>
-                                                                                    <th style={{ width: '30%' }}>Assigned By</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                {reversedAssignments.map((entry, index) => (
-                                                                                    <tr key={index}>
-                                                                                        <td>{entry.assigned_at ? moment(entry.assigned_at).format('DD/MM/YYYY HH:mm') : 'N/A'}</td>
-                                                                                        <td>
-                                                                                            {entry.employee_name ? (
-                                                                                                <span>{entry.employee_name}</span>
-                                                                                            ) : (
-                                                                                                <span className="text-danger">Unassigned</span>
-                                                                                            )}
-                                                                                        </td>
-                                                                                        <td>{entry.employee_no || '—'}</td>
-                                                                                        <td>
-                                                                                            {entry.status ? (
-                                                                                                <span className={`badge ${getStatusBadgeClass(entry.status)}`}>
-                                                                                                    {entry.status}
-                                                                                                </span>
-                                                                                            ) : (
-                                                                                                <span className="text-muted">—</span>
-                                                                                            )}
-                                                                                        </td>
-                                                                                        <td>{entry.assigned_by || 'System'}</td>
-                                                                                    </tr>
-                                                                                ))}
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                </div>
-                                                            ) : null;
-                                                        })()}
-
                                                         {/* Parse and display existing comments */}
                                                         {(() => {
                                                             let commentsHistory = [];
