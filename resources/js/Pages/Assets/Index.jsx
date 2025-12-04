@@ -11,10 +11,22 @@ export default function Index({ assets, flash }) {
     const [commentInputs, setCommentInputs] = useState({});
     const [submitting, setSubmitting] = useState({});
     const [expandedRows, setExpandedRows] = useState({});
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [assetToDelete, setAssetToDelete] = useState(null);
 
     const handleDelete = (assetId, assetName) => {
-        if (confirm(`Are you sure you want to delete asset "${assetName}"? This action cannot be undone.`)) {
-            destroy(route('assets.destroy', assetId));
+        setAssetToDelete({ id: assetId, name: assetName });
+        setShowDeleteModal(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false);
+        setAssetToDelete(null);
+    };
+
+    const handleConfirmDelete = () => {
+        if (assetToDelete) {
+            destroy(route('assets.destroy', assetToDelete.id));
         }
     };
 
@@ -382,6 +394,31 @@ export default function Index({ assets, flash }) {
                         </nav>
                     </div>
                 )}
+
+                {/* Delete Modal */}
+                <div className={`modal fade ${showDeleteModal ? 'show' : ''}`} style={{ display: showDeleteModal ? 'block' : 'none' }} tabIndex="-1" role="dialog">
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Delete</h5>
+                                <button type="button" className="btn-close" onClick={handleCloseDeleteModal} disabled={processing}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Are you sure you want to delete asset <strong>"{assetToDelete?.name}"</strong>?</p>
+                                <p className="text-danger mb-0">This action cannot be undone.</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={handleCloseDeleteModal} disabled={processing}>
+                                    Cancel
+                                </button>
+                                <button type="button" className="btn btn-danger" onClick={handleConfirmDelete} disabled={processing}>
+                                    {processing ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {showDeleteModal && <div className="modal-backdrop fade show"></div>}
             </div>
         </>
     );
