@@ -386,7 +386,7 @@ export default function Show({ asset }) {
                             </div>
                         )}
 
-                        {assignmentHistory.length > 0 && (
+                        {auth?.user?.role === 'admin' && assignmentHistory.length > 0 && (
                             <div className="row">
                                 <div className="col-12">
                                     <div className="mb-3">
@@ -436,7 +436,7 @@ export default function Show({ asset }) {
                             </div>
                         )}
 
-                        {modificationHistory.length > 0 && (
+                        {auth?.user?.role === 'admin' && modificationHistory.length > 0 && (
                             <div className="row">
                                 <div className="col-12">
                                     <div className="mb-3">
@@ -488,40 +488,44 @@ export default function Show({ asset }) {
                             </div>
                         )}
 
-                        <hr />
+                        {auth?.user?.role === 'admin' && (
+                            <>
+                                <hr />
 
-                        <div className="row">
-                            <div className="col-md-6">
-                                <div className="mb-3">
-                                    <label className="form-label fw-bold">Created At:</label>
-                                    <p className="form-control-plaintext">{moment(asset.created_at).format('DD/MM/YYYY HH:mm')}</p>
-                                </div>
-                            </div>
-                            <div className="col-md-6">
-                                <div className="mb-3">
-                                    <label className="form-label fw-bold">Updated At:</label>
-                                    <p className="form-control-plaintext">{moment(asset.updated_at).format('DD/MM/YYYY HH:mm')}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {asset.creator && (
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <div className="mb-3">
-                                        <label className="form-label fw-bold">Created By:</label>
-                                        <p className="form-control-plaintext">{asset.creator.name || 'Unknown User'}</p>
-                                    </div>
-                                </div>
-                                {asset.updater && (
+                                <div className="row">
                                     <div className="col-md-6">
                                         <div className="mb-3">
-                                            <label className="form-label fw-bold">Last Updated By:</label>
-                                            <p className="form-control-plaintext">{asset.updater.name || 'Unknown User'}</p>
+                                            <label className="form-label fw-bold">Created At:</label>
+                                            <p className="form-control-plaintext">{moment(asset.created_at).format('DD/MM/YYYY HH:mm')}</p>
                                         </div>
                                     </div>
+                                    <div className="col-md-6">
+                                        <div className="mb-3">
+                                            <label className="form-label fw-bold">Updated At:</label>
+                                            <p className="form-control-plaintext">{moment(asset.updated_at).format('DD/MM/YYYY HH:mm')}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {asset.creator && (
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label fw-bold">Created By:</label>
+                                                <p className="form-control-plaintext">{asset.creator.name || 'Unknown User'}</p>
+                                            </div>
+                                        </div>
+                                        {asset.updater && (
+                                            <div className="col-md-6">
+                                                <div className="mb-3">
+                                                    <label className="form-label fw-bold">Last Updated By:</label>
+                                                    <p className="form-control-plaintext">{asset.updater.name || 'Unknown User'}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
-                            </div>
+                            </>
                         )}
                     </div>
                 </div>

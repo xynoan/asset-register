@@ -107,7 +107,7 @@ export default function Index({ assets, flash }) {
                                     <th>Status</th>
                                     <th>Assigned To</th>
                                     <th>Status Duration</th>
-                                    <th>Last Modified</th>
+                                    {auth?.user?.role === 'admin' && <th>Last Modified</th>}
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -151,19 +151,21 @@ export default function Index({ assets, flash }) {
                                                     {asset.status_duration_string || 'Unknown'}
                                                 </small>
                                             </td>
-                                            <td>
-                                                <small className="text-muted">
-                                                    {asset.updated_at ? moment(asset.updated_at).format('DD/MM/YYYY') : 'N/A'}
-                                                    {asset.updater && (
-                                                        <>
-                                                            <br />
-                                                            <span className="text-muted" style={{ fontSize: '0.85em' }}>
-                                                                by {asset.updater.name || 'System'}
-                                                            </span>
-                                                        </>
-                                                    )}
-                                                </small>
-                                            </td>
+                                            {auth?.user?.role === 'admin' && (
+                                                <td>
+                                                    <small className="text-muted">
+                                                        {asset.updated_at ? moment(asset.updated_at).format('DD/MM/YYYY') : 'N/A'}
+                                                        {asset.updater && (
+                                                            <>
+                                                                <br />
+                                                                <span className="text-muted" style={{ fontSize: '0.85em' }}>
+                                                                    by {asset.updater.name || 'System'}
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                    </small>
+                                                </td>
+                                            )}
                                             <td>
                                                 <Link
                                                     href={route('assets.show', asset.id)}
@@ -194,7 +196,7 @@ export default function Index({ assets, flash }) {
                                         </tr>
                                         {expandedRows[asset.id] && (
                                             <tr key={`${asset.id}-comment`}>
-                                                <td colSpan="9" className="bg-light">
+                                                <td colSpan={auth?.user?.role === 'admin' ? 9 : 8} className="bg-light">
                                                     <div className="p-3">
                                                         {/* Parse and display assignment history */}
                                                         {(() => {
