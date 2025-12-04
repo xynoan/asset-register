@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Asset;
 
 class User extends Authenticatable
 {
@@ -70,5 +71,29 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    /**
+     * Get assets created by this user.
+     */
+    public function createdAssets()
+    {
+        return $this->hasMany(Asset::class, 'created_by');
+    }
+
+    /**
+     * Get assets updated by this user.
+     */
+    public function updatedAssets()
+    {
+        return $this->hasMany(Asset::class, 'updated_by');
+    }
+
+    /**
+     * Get total count of assets associated with this user (created or updated).
+     */
+    public function getAssetsCountAttribute(): int
+    {
+        return $this->createdAssets()->count() + $this->updatedAssets()->count();
     }
 }

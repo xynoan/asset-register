@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Asset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,6 +19,34 @@ class UserController extends Controller
     public function index(): Response
     {
         $users = User::orderBy('created_at', 'desc')->get();
+        
+        if ($users->isEmpty()) {
+            return Inertia::render('Users/Index', [
+                'users' => $users,
+            ]);
+        }
+        
+        // Get all user IDs
+        $userIds = $users->pluck('id')->toArray();
+        
+        // Get all assets that reference any of these users (single query)
+        $assets = Asset::whereIn('created_by', $userIds)
+            ->orWhereIn('updated_by', $userIds)
+            ->get(['id', 'created_by', 'updated_by']);
+        
+        // Count unique assets per user in memory
+        $userAssetCounts = [];
+        foreach ($userIds as $userId) {
+            $userAssetCounts[$userId] = $assets->filter(function ($asset) use ($userId) {
+                return $asset->created_by == $userId || $asset->updated_by == $userId;
+            })->unique('id')->count();
+        }
+        
+        // Attach asset counts to users
+        $users = $users->map(function ($user) use ($userAssetCounts) {
+            $user->assets_count = $userAssetCounts[$user->id] ?? 0;
+            return $user;
+        });
 
         return Inertia::render('Users/Index', [
             'users' => $users,
@@ -100,6 +129,17 @@ class UserController extends Controller
         if ($user->id === auth()->id()) {
             return redirect()->route('users.index')
                 ->with('error', 'You cannot delete your own account.');
+        }
+
+        // Check if user has any assets (created or updated)
+        $assetsCount = Asset::where(function ($query) use ($user) {
+            $query->where('created_by', $user->id)
+                  ->orWhere('updated_by', $user->id);
+        })->count();
+        
+        if ($assetsCount > 0) {
+            return redirect()->route('users.index')
+                ->with('error', 'Cannot delete user. This user has existing assets associated with them.');
         }
 
         $user->delete();

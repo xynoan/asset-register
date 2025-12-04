@@ -10,8 +10,8 @@ export default function Index({ users, flash }) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
 
-    const handleDelete = (userId, userName) => {
-        setUserToDelete({ id: userId, name: userName });
+    const handleDelete = (userId, userName, assetsCount) => {
+        setUserToDelete({ id: userId, name: userName, assetsCount: assetsCount });
         setShowDeleteModal(true);
     };
 
@@ -97,9 +97,10 @@ export default function Index({ users, flash }) {
                                                 Edit
                                             </Link>
                                             <button
-                                                onClick={() => handleDelete(user.id, user.name)}
+                                                onClick={() => handleDelete(user.id, user.name, user.assets_count || 0)}
                                                 className="btn btn-sm btn-outline-danger"
-                                                disabled={processing}
+                                                disabled={processing || (user.assets_count > 0)}
+                                                title={user.assets_count > 0 ? 'Cannot delete user with existing assets' : ''}
                                             >
                                                 <FontAwesomeIcon icon={faTrash} className="me-1" />
                                                 Delete
@@ -121,16 +122,30 @@ export default function Index({ users, flash }) {
                                 <button type="button" className="btn-close" onClick={handleCloseDeleteModal} disabled={processing}></button>
                             </div>
                             <div className="modal-body">
-                                <p>Are you sure you want to delete user <strong>"{userToDelete?.name}"</strong>?</p>
-                                <p className="text-danger mb-0">This action cannot be undone.</p>
+                                {userToDelete?.assetsCount > 0 ? (
+                                    <>
+                                        <p>Cannot delete user <strong>"{userToDelete?.name}"</strong>.</p>
+                                        <p className="text-danger mb-0">
+                                            This user has <strong>{userToDelete.assetsCount}</strong> asset(s) associated with them. 
+                                            Please reassign or remove these assets before deleting the user.
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p>Are you sure you want to delete user <strong>"{userToDelete?.name}"</strong>?</p>
+                                        <p className="text-danger mb-0">This action cannot be undone.</p>
+                                    </>
+                                )}
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" onClick={handleCloseDeleteModal} disabled={processing}>
-                                    Cancel
+                                    {userToDelete?.assetsCount > 0 ? 'Close' : 'Cancel'}
                                 </button>
-                                <button type="button" className="btn btn-danger" onClick={handleConfirmDelete} disabled={processing}>
-                                    {processing ? 'Deleting...' : 'Delete'}
-                                </button>
+                                {userToDelete?.assetsCount === 0 && (
+                                    <button type="button" className="btn btn-danger" onClick={handleConfirmDelete} disabled={processing}>
+                                        {processing ? 'Deleting...' : 'Delete'}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
