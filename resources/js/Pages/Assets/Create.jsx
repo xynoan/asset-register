@@ -1,7 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { getTodayLocalDate } from '../../utils/dateUtils';
+import { getTodayLocalDate, getTomorrowLocalDate } from '../../utils/dateUtils';
 import Header from '@/Components/Header';
 
 export default function Create({ employees }) {
@@ -38,7 +38,7 @@ export default function Create({ employees }) {
         brand_manufacturer: '',
         model_number: '',
         serial_number: '',
-        purchase_date: '',
+        purchase_date: getTodayLocalDate(),
         vendor_supplier: '',
         warranty_expiry_date: '',
         status: 'Spare',
@@ -71,7 +71,7 @@ export default function Create({ employees }) {
     const addMaintenanceEntry = () => {
         setData('maintenance_history', [
             ...data.maintenance_history,
-            { date: '', description: '', cost: '', performed_by: '' }
+            { date: getTodayLocalDate(), description: '', cost: '', performed_by: '' }
         ]);
     };
 
@@ -121,7 +121,7 @@ export default function Create({ employees }) {
     const addNote = () => {
         setData('notes', [
             ...data.notes,
-            { date: '', note: '', added_by: auth?.user?.name || 'Unknown User' }
+            { date: getTodayLocalDate(), note: '', added_by: auth?.user?.name || 'Unknown User' }
         ]);
     };
 
@@ -140,7 +140,7 @@ export default function Create({ employees }) {
     const addComment = () => {
         setData('comments_history', [
             ...data.comments_history,
-            { date: '', comment: '', added_by: auth?.user?.name || 'Unknown User' }
+            { date: getTodayLocalDate(), comment: '', added_by: auth?.user?.name || 'Unknown User' }
         ]);
     };
 
@@ -344,7 +344,18 @@ export default function Create({ employees }) {
                                             className={`form-control ${errors.warranty_expiry_date ? 'is-invalid' : ''}`}
                                             id="warranty_expiry_date"
                                             value={data.warranty_expiry_date}
-                                            onChange={e => setData('warranty_expiry_date', e.target.value)}
+                                            onChange={e => {
+                                                const selectedDate = e.target.value;
+                                                const today = getTodayLocalDate();
+                                                if (selectedDate && selectedDate <= today) {
+                                                    // Clear the value if it's today or in the past
+                                                    setData('warranty_expiry_date', '');
+                                                    alert('Warranty expiry date must be in the future (after today).');
+                                                } else {
+                                                    setData('warranty_expiry_date', selectedDate);
+                                                }
+                                            }}
+                                            min={getTomorrowLocalDate()}
                                         />
                                         {errors.warranty_expiry_date && (
                                             <div className="invalid-feedback">
