@@ -104,6 +104,19 @@ class AssetController extends Controller
             }
         }
 
+        // Handle maintenance_history - ensure it's an array (cast will handle JSON encoding)
+        $maintenanceHistory = null;
+        if (!empty($validated['maintenance_history'])) {
+            if (is_string($validated['maintenance_history'])) {
+                // If it's a JSON string, decode it to array (cast will encode it back)
+                $decoded = json_decode($validated['maintenance_history'], true);
+                $maintenanceHistory = is_array($decoded) ? $decoded : null;
+            } elseif (is_array($validated['maintenance_history'])) {
+                // If it's already an array, use it directly
+                $maintenanceHistory = $validated['maintenance_history'];
+            }
+        }
+
         $asset = Asset::create([
             'asset_id' => $assetId,
             'asset_category' => $validated['asset_category'],
@@ -114,7 +127,7 @@ class AssetController extends Controller
             'vendor_supplier' => !empty($validated['vendor_supplier']) ? $validated['vendor_supplier'] : null,
             'warranty_expiry_date' => !empty($validated['warranty_expiry_date']) ? $validated['warranty_expiry_date'] : null,
             'status' => $validated['status'],
-            'maintenance_history' => !empty($validated['maintenance_history']) ? $validated['maintenance_history'] : null,
+            'maintenance_history' => $maintenanceHistory,
             'comments_history' => !empty($validated['comments_history']) ? $validated['comments_history'] : null,
             'notes' => !empty($validated['notes']) ? $validated['notes'] : null,
             'document_paths' => !empty($documentPaths) ? $documentPaths : null,
@@ -391,6 +404,105 @@ class AssetController extends Controller
                 'new_value' => $newDocCount . ' document(s)',
             ];
         }
+
+        // Track comments_history changes
+        $oldCommentsHistory = $asset->comments_history ?? [];
+        $newCommentsHistory = !empty($validated['comments_history']) 
+            ? (is_array($validated['comments_history']) ? $validated['comments_history'] : json_decode($validated['comments_history'], true) ?? [])
+            : [];
+        
+        // Normalize for comparison
+        if (is_string($oldCommentsHistory)) {
+            $oldCommentsHistory = json_decode($oldCommentsHistory, true) ?? [];
+        }
+        if (!is_array($oldCommentsHistory)) {
+            $oldCommentsHistory = [];
+        }
+        if (!is_array($newCommentsHistory)) {
+            $newCommentsHistory = [];
+        }
+        
+        $oldCommentsCount = count($oldCommentsHistory);
+        $newCommentsCount = count($newCommentsHistory);
+        
+        // Check if comments_history changed (either count changed or content changed)
+        $oldCommentsJson = json_encode($oldCommentsHistory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $newCommentsJson = json_encode($newCommentsHistory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        
+        if ($oldCommentsJson !== $newCommentsJson) {
+            $action = $newCommentsCount > $oldCommentsCount ? 'added' : ($newCommentsCount < $oldCommentsCount ? 'removed' : 'modified');
+            $changes[] = [
+                'field' => 'comments_history',
+                'old_value' => null,
+                'new_value' => "Comment {$action}",
+            ];
+        }
+
+        // Track notes changes
+        $oldNotes = $asset->notes ?? [];
+        $newNotes = !empty($validated['notes']) 
+            ? (is_array($validated['notes']) ? $validated['notes'] : json_decode($validated['notes'], true) ?? [])
+            : [];
+        
+        // Normalize for comparison
+        if (is_string($oldNotes)) {
+            $oldNotes = json_decode($oldNotes, true) ?? [];
+        }
+        if (!is_array($oldNotes)) {
+            $oldNotes = [];
+        }
+        if (!is_array($newNotes)) {
+            $newNotes = [];
+        }
+        
+        $oldNotesCount = count($oldNotes);
+        $newNotesCount = count($newNotes);
+        
+        // Check if notes changed (either count changed or content changed)
+        $oldNotesJson = json_encode($oldNotes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $newNotesJson = json_encode($newNotes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        
+        if ($oldNotesJson !== $newNotesJson) {
+            $action = $newNotesCount > $oldNotesCount ? 'added' : ($newNotesCount < $oldNotesCount ? 'removed' : 'modified');
+            $changes[] = [
+                'field' => 'notes',
+                'old_value' => null,
+                'new_value' => "Note {$action}",
+            ];
+        }
+
+        // Track maintenance_history changes
+        $oldMaintenanceHistory = $asset->maintenance_history ?? [];
+        $newMaintenanceHistory = !empty($validated['maintenance_history']) 
+            ? (is_array($validated['maintenance_history']) ? $validated['maintenance_history'] : json_decode($validated['maintenance_history'], true) ?? [])
+            : [];
+        
+        // Normalize for comparison
+        if (is_string($oldMaintenanceHistory)) {
+            $oldMaintenanceHistory = json_decode($oldMaintenanceHistory, true) ?? [];
+        }
+        if (!is_array($oldMaintenanceHistory)) {
+            $oldMaintenanceHistory = [];
+        }
+        if (!is_array($newMaintenanceHistory)) {
+            $newMaintenanceHistory = [];
+        }
+        
+        $oldMaintenanceCount = count($oldMaintenanceHistory);
+        $newMaintenanceCount = count($newMaintenanceHistory);
+        
+        // Check if maintenance_history changed (either count changed or content changed)
+        $oldMaintenanceJson = json_encode($oldMaintenanceHistory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $newMaintenanceJson = json_encode($newMaintenanceHistory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        
+        if ($oldMaintenanceJson !== $newMaintenanceJson) {
+            $action = $newMaintenanceCount > $oldMaintenanceCount ? 'added' : ($newMaintenanceCount < $oldMaintenanceCount ? 'removed' : 'modified');
+            $changes[] = [
+                'field' => 'maintenance_history',
+                'old_value' => null,
+                'new_value' => "Maintenance record {$action}",
+            ];
+        }
         
         $updateData = [
             'asset_category' => $validated['asset_category'],
@@ -598,9 +710,24 @@ class AssetController extends Controller
             'added_at' => now()->toDateTimeString(),
         ];
 
+        // Record modification history for comment addition
+        $modificationHistory = $asset->modification_history ?? [];
+        $modificationHistory[] = [
+            'timestamp' => now()->toDateTimeString(),
+            'date' => now()->format('Y-m-d'),
+            'modified_by_id' => $userId,
+            'modified_by' => $addedBy,
+            'changes' => [[
+                'field' => 'comments_history',
+                'old_value' => null,
+                'new_value' => 'Comment added',
+            ]],
+        ];
+
         $asset->update([
             'comments_history' => $commentsHistory,
             'updated_by' => $userId,
+            'modification_history' => $modificationHistory,
         ]);
 
         if ($request->expectsJson() || $request->is('api/*')) {

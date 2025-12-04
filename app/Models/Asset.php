@@ -54,6 +54,7 @@ class Asset extends Model
         'warranty_expiry_date' => 'date',
         'status_history' => 'array',
         'status_changed_at' => 'datetime',
+        'maintenance_history' => 'array',
         'comments_history' => 'array',
         'notes' => 'array',
         'modification_history' => 'array',
