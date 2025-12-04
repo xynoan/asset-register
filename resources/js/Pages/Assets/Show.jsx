@@ -436,7 +436,7 @@ export default function Show({ asset }) {
                             </div>
                         )}
 
-                        {/* {modificationHistory.length > 0 && (
+                        {modificationHistory.length > 0 && (
                             <div className="row">
                                 <div className="col-12">
                                     <div className="mb-3">
@@ -486,7 +486,7 @@ export default function Show({ asset }) {
                                     </div>
                                 </div>
                             </div>
-                        )} */}
+                        )}
 
                         <hr />
 

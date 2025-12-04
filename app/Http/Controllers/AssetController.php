@@ -104,38 +104,6 @@ class AssetController extends Controller
             }
         }
 
-        // Prepare initial modification history entry for asset creation
-        $user = Auth::user();
-        $modifiedByName = $user ? $user->name : 'System';
-        $docCount = count($documentPaths);
-        
-        $initialChanges = [
-            ['field' => 'asset_category', 'old_value' => null, 'new_value' => $validated['asset_category']],
-            ['field' => 'brand_manufacturer', 'old_value' => null, 'new_value' => $validated['brand_manufacturer']],
-            ['field' => 'model_number', 'old_value' => null, 'new_value' => $validated['model_number']],
-            ['field' => 'serial_number', 'old_value' => null, 'new_value' => $validated['serial_number']],
-            ['field' => 'purchase_date', 'old_value' => null, 'new_value' => $validated['purchase_date']],
-            ['field' => 'status', 'old_value' => null, 'new_value' => $validated['status']],
-        ];
-        
-        if (!empty($validated['vendor_supplier'])) {
-            $initialChanges[] = ['field' => 'vendor_supplier', 'old_value' => null, 'new_value' => $validated['vendor_supplier']];
-        }
-        
-        if (!empty($validated['warranty_expiry_date'])) {
-            $initialChanges[] = ['field' => 'warranty_expiry_date', 'old_value' => null, 'new_value' => $validated['warranty_expiry_date']];
-        }
-        
-        if ($assignedTo) {
-            $employee = Employee::find($assignedTo);
-            $employeeNo = $employee ? $employee->employee_no : $assignedTo;
-            $initialChanges[] = ['field' => 'assigned_to', 'old_value' => null, 'new_value' => $employeeNo];
-        }
-        
-        if ($docCount > 0) {
-            $initialChanges[] = ['field' => 'documents', 'old_value' => null, 'new_value' => $docCount . ' document(s)'];
-        }
-
         $asset = Asset::create([
             'asset_id' => $assetId,
             'asset_category' => $validated['asset_category'],
@@ -154,13 +122,6 @@ class AssetController extends Controller
             'created_by' => $userId,
             'updated_by' => $userId,
             'status_changed_at' => now(),
-            'modification_history' => [[
-                'timestamp' => now()->toDateTimeString(),
-                'date' => now()->format('Y-m-d'),
-                'modified_by_id' => $userId,
-                'modified_by' => $modifiedByName,
-                'changes' => $initialChanges,
-            ]],
         ]);
 
         // Record initial status in status history
