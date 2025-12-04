@@ -14,6 +14,10 @@ export default function Index({ categories, brands, suppliers }) {
     const [newName, setNewName] = useState('');
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [showAssetsModal, setShowAssetsModal] = useState(false);
+    const [assets, setAssets] = useState([]);
+    const [loadingAssets, setLoadingAssets] = useState(false);
+    const [selectedLookup, setSelectedLookup] = useState(null);
 
     const handleOpenAddModal = (type) => {
         setCurrentType(type);
@@ -56,6 +60,45 @@ export default function Index({ categories, brands, suppliers }) {
     const handleCloseDeleteModal = () => {
         setShowDeleteModal(false);
         setCurrentItem(null);
+    };
+
+    const handleOpenAssetsModal = async (item, type) => {
+        if (item.usage_count === 0) {
+            return; // No assets to show
+        }
+
+        setSelectedLookup({ item, type });
+        setLoadingAssets(true);
+        setShowAssetsModal(true);
+        setAssets([]);
+
+        try {
+            const response = await axios.get(`/api/lookups/${type}/${item.id}/assets`);
+            if (response.data.success) {
+                setAssets(response.data.data || []);
+            }
+        } catch (error) {
+            console.error('Error fetching assets:', error);
+            alert('Failed to load assets. Please try again.');
+        } finally {
+            setLoadingAssets(false);
+        }
+    };
+
+    const handleCloseAssetsModal = () => {
+        setShowAssetsModal(false);
+        setAssets([]);
+        setSelectedLookup(null);
+    };
+
+    const getStatusBadgeClass = (status) => {
+        const statusClasses = {
+            'In-use': 'bg-success',
+            'Spare': 'bg-info',
+            'Under Maintenance': 'bg-warning',
+            'Retired': 'bg-secondary'
+        };
+        return statusClasses[status] || 'bg-secondary';
     };
 
     const handleSaveEdit = async () => {
@@ -183,7 +226,12 @@ export default function Index({ categories, brands, suppliers }) {
                                                 <strong>{item.name}</strong>
                                             </td>
                                             <td>
-                                                <span className={`badge ${item.usage_count > 0 ? 'bg-warning text-dark' : 'bg-success'}`}>
+                                                <span 
+                                                    className={`badge ${item.usage_count > 0 ? 'bg-warning text-dark' : 'bg-success'} ${item.usage_count > 0 ? 'cursor-pointer' : ''}`}
+                                                    style={item.usage_count > 0 ? { cursor: 'pointer' } : {}}
+                                                    onClick={() => item.usage_count > 0 && handleOpenAssetsModal(item, type)}
+                                                    title={item.usage_count > 0 ? `Click to view ${item.usage_count} asset(s)` : ''}
+                                                >
                                                     {item.usage_count} asset{item.usage_count !== 1 ? 's' : ''}
                                                 </span>
                                             </td>
@@ -403,6 +451,87 @@ export default function Index({ categories, brands, suppliers }) {
                     </div>
                 </div>
                 {showDeleteModal && <div className="modal-backdrop fade show"></div>}
+
+                {/* Assets Modal */}
+                <div className={`modal fade ${showAssetsModal ? 'show' : ''}`} style={{ display: showAssetsModal ? 'block' : 'none' }} tabIndex="-1" role="dialog">
+                    <div className="modal-dialog modal-xl" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    Assets for {selectedLookup?.type === 'categories' ? 'Category' : selectedLookup?.type === 'brands' ? 'Brand' : 'Supplier'}: <strong>{selectedLookup?.item?.name}</strong>
+                                </h5>
+                                <button type="button" className="btn-close" onClick={handleCloseAssetsModal} disabled={loadingAssets}></button>
+                            </div>
+                            <div className="modal-body">
+                                {loadingAssets ? (
+                                    <div className="text-center py-4">
+                                        <div className="spinner-border text-primary" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                ) : assets.length === 0 ? (
+                                    <div className="text-muted text-center py-4">
+                                        No assets found.
+                                    </div>
+                                ) : (
+                                    <div className="table-responsive">
+                                        <table className="table table-hover">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th>Asset ID</th>
+                                                    <th>Category</th>
+                                                    <th>Brand / Manufacturer</th>
+                                                    <th>Model Number</th>
+                                                    <th>Serial Number</th>
+                                                    <th>Status</th>
+                                                    <th>Assigned To</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {assets.map((asset) => (
+                                                    <tr key={asset.id}>
+                                                        <td><strong>{asset.asset_id}</strong></td>
+                                                        <td>{asset.asset_category}</td>
+                                                        <td>{asset.brand_manufacturer}</td>
+                                                        <td>{asset.model_number || '—'}</td>
+                                                        <td>{asset.serial_number || '—'}</td>
+                                                        <td>
+                                                            <span className={`badge ${getStatusBadgeClass(asset.status)}`}>
+                                                                {asset.status}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            {asset.assigned_employee ? (
+                                                                <span>{asset.assigned_employee.full_name}</span>
+                                                            ) : (
+                                                                <span className="text-danger">Unassigned</span>
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            <Link
+                                                                href={route('assets.show', asset.id)}
+                                                                className="btn btn-sm btn-outline-success"
+                                                            >
+                                                                View
+                                                            </Link>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={handleCloseAssetsModal} disabled={loadingAssets}>
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {showAssetsModal && <div className="modal-backdrop fade show"></div>}
             </div>
         </>
     );

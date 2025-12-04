@@ -23,3 +23,4 @@ Route::delete('lookups/suppliers/{id}', [LookupController::class, 'deleteSupplie
 Route::put('lookups/categories/{id}', [LookupController::class, 'updateCategory'])->name('lookups.categories.update');
 Route::put('lookups/brands/{id}', [LookupController::class, 'updateBrand'])->name('lookups.brands.update');
 Route::put('lookups/suppliers/{id}', [LookupController::class, 'updateSupplier'])->name('lookups.suppliers.update');
+Route::get('lookups/{type}/{id}/assets', [LookupController::class, 'getAssetsByLookup'])->name('lookups.assets');

@@ -373,4 +373,57 @@ class LookupController extends Controller
             'message' => 'Supplier updated successfully'
         ]);
     }
+
+    /**
+     * Get assets by lookup type and ID.
+     */
+    public function getAssetsByLookup($type, $id): JsonResponse
+    {
+        $lookup = null;
+        $fieldName = '';
+
+        switch ($type) {
+            case 'categories':
+                $lookup = AssetCategory::findOrFail($id);
+                $fieldName = 'asset_category';
+                break;
+            case 'brands':
+                $lookup = BrandManufacturer::findOrFail($id);
+                $fieldName = 'brand_manufacturer';
+                break;
+            case 'suppliers':
+                $lookup = Supplier::findOrFail($id);
+                $fieldName = 'vendor_supplier';
+                break;
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid lookup type'
+                ], 400);
+        }
+
+        $assets = Asset::with(['assignedEmployee', 'creator', 'updater'])
+            ->where($fieldName, $lookup->name)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Add document count and status duration to each asset
+        $assets->transform(function ($asset) {
+            $documentCount = 0;
+            if ($asset->document_paths && is_array($asset->document_paths)) {
+                $documentCount = count($asset->document_paths);
+            }
+            $asset->document_count = $documentCount;
+            $asset->status_duration_days = $asset->getStatusDurationDays();
+            $asset->status_duration_string = $asset->getStatusDurationString();
+            return $asset;
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $assets,
+            'lookup_name' => $lookup->name,
+            'message' => 'Assets retrieved successfully'
+        ]);
+    }
 }
