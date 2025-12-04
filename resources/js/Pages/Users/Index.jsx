@@ -1,15 +1,28 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import moment from 'moment';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faUserPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Header from '@/Components/Header';
 
 export default function Index({ users, flash }) {
     const { delete: destroy, processing } = useForm();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     const handleDelete = (userId, userName) => {
-        if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-            destroy(route('users.destroy', userId));
+        setUserToDelete({ id: userId, name: userName });
+        setShowDeleteModal(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false);
+        setUserToDelete(null);
+    };
+
+    const handleConfirmDelete = () => {
+        if (userToDelete) {
+            destroy(route('users.destroy', userToDelete.id));
         }
     };
 
@@ -98,6 +111,31 @@ export default function Index({ users, flash }) {
                         </table>
                     </div>
                 )}
+
+                {/* Delete Modal */}
+                <div className={`modal fade ${showDeleteModal ? 'show' : ''}`} style={{ display: showDeleteModal ? 'block' : 'none' }} tabIndex="-1" role="dialog">
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Confirm Delete</h5>
+                                <button type="button" className="btn-close" onClick={handleCloseDeleteModal} disabled={processing}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Are you sure you want to delete user <strong>"{userToDelete?.name}"</strong>?</p>
+                                <p className="text-danger mb-0">This action cannot be undone.</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={handleCloseDeleteModal} disabled={processing}>
+                                    Cancel
+                                </button>
+                                <button type="button" className="btn btn-danger" onClick={handleConfirmDelete} disabled={processing}>
+                                    {processing ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {showDeleteModal && <div className="modal-backdrop fade show"></div>}
             </div>
         </>
     );
