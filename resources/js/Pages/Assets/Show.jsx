@@ -1,5 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import moment from 'moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBox, faEdit, faArrowLeft, faDownload, faFilePdf, faFileWord, faFileImage, faFileAlt, faPaperclip } from '@fortawesome/free-solid-svg-icons';
 import Header from '@/Components/Header';
 
 export default function Show({ asset }) {
@@ -115,15 +117,15 @@ export default function Show({ asset }) {
     const getFileIcon = (fileName) => {
         const ext = fileName.split('.').pop()?.toLowerCase();
         const iconMap = {
-            'pdf': '📄',
-            'doc': '📝',
-            'docx': '📝',
-            'jpg': '🖼️',
-            'jpeg': '🖼️',
-            'png': '🖼️',
-            'txt': '📃',
+            'pdf': faFilePdf,
+            'doc': faFileWord,
+            'docx': faFileWord,
+            'jpg': faFileImage,
+            'jpeg': faFileImage,
+            'png': faFileImage,
+            'txt': faFileAlt,
         };
-        return iconMap[ext] || '📎';
+        return iconMap[ext] || faPaperclip;
     };
 
     return (
@@ -132,13 +134,14 @@ export default function Show({ asset }) {
             <Header activePage="assets" />
             <div className="container my-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h1>Asset Details</h1>
+                    <h1><FontAwesomeIcon icon={faBox} className="me-2" />Asset Details</h1>
                     <div>
                         {auth?.user?.role !== 'user' && (
                             <Link
                                 href={route('assets.edit', asset.id)}
                                 className="btn btn-outline-primary me-2"
                             >
+                                <FontAwesomeIcon icon={faEdit} className="me-2" />
                                 Edit Asset
                             </Link>
                         )}
@@ -146,6 +149,7 @@ export default function Show({ asset }) {
                             href={route('assets.index')}
                             className="btn btn-secondary"
                         >
+                            <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
                             Back to List
                         </Link>
                     </div>
@@ -303,7 +307,9 @@ export default function Show({ asset }) {
                                                         const fileUrl = documentUrls[index] || `/storage/${filePath}`;
                                                         return (
                                                             <tr key={index}>
-                                                                <td className="text-center">{getFileIcon(fileName)}</td>
+                                                                <td className="text-center">
+                                                                    <FontAwesomeIcon icon={getFileIcon(fileName)} size="lg" />
+                                                                </td>
                                                                 <td>{fileName}</td>
                                                                 <td>
                                                                     <a
@@ -312,6 +318,7 @@ export default function Show({ asset }) {
                                                                         rel="noopener noreferrer"
                                                                         className="btn btn-sm btn-outline-primary"
                                                                     >
+                                                                        <FontAwesomeIcon icon={faDownload} className="me-2" />
                                                                         View / Download
                                                                     </a>
                                                                 </td>

@@ -1,6 +1,8 @@
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import moment from 'moment';
 import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBox, faPlus, faEye, faEdit, faTrash, faChevronDown, faChevronUp, faComment, faCommentDots } from '@fortawesome/free-solid-svg-icons';
 import Header from '@/Components/Header';
 
 export default function Index({ assets, flash }) {
@@ -80,9 +82,10 @@ export default function Index({ assets, flash }) {
                 )}
 
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h1>Assets</h1>
+                    <h1><FontAwesomeIcon icon={faBox} className="me-2" />Assets</h1>
                     {auth?.user?.role !== 'user' && (
                         <Link href={route('assets.create')} className="btn btn-danger">
+                            <FontAwesomeIcon icon={faPlus} className="me-2" />
                             Add New Asset
                         </Link>
                     )}
@@ -123,9 +126,9 @@ export default function Index({ assets, flash }) {
                                                     title={expandedRows[asset.id] ? 'Hide comment' : hasComments(asset) ? 'View comments' : 'Add comment'}
                                                 >
                                                     {expandedRows[asset.id] ? (
-                                                        <i className="fas fa-chevron-down"></i>
+                                                        <FontAwesomeIcon icon={faChevronUp} />
                                                     ) : (
-                                                        <i className={hasComments(asset) ? "fas fa-comment text-danger" : "far fa-comment"}></i>
+                                                        <FontAwesomeIcon icon={hasComments(asset) ? faCommentDots : faComment} className={hasComments(asset) ? "text-danger" : ""} />
                                                     )}
                                                 </button>
                                             </td>
@@ -171,6 +174,7 @@ export default function Index({ assets, flash }) {
                                                     href={route('assets.show', asset.id)}
                                                     className="btn btn-sm btn-outline-success me-2 my-1"
                                                 >
+                                                    <FontAwesomeIcon icon={faEye} className="me-1" />
                                                     View
                                                 </Link>
                                                 {auth?.user?.role !== 'user' && (
@@ -179,6 +183,7 @@ export default function Index({ assets, flash }) {
                                                             href={route('assets.edit', asset.id)}
                                                             className="btn btn-sm btn-outline-primary me-2 my-1"
                                                         >
+                                                            <FontAwesomeIcon icon={faEdit} className="me-1" />
                                                             Edit
                                                         </Link>
                                                         {auth?.user?.role !== 'encoder' && (
@@ -187,6 +192,7 @@ export default function Index({ assets, flash }) {
                                                                 className="btn btn-sm btn-outline-danger my-1"
                                                                 disabled={processing}
                                                             >
+                                                                <FontAwesomeIcon icon={faTrash} className="me-1" />
                                                                 Delete
                                                             </button>
                                                         )}
@@ -325,6 +331,7 @@ export default function Index({ assets, flash }) {
                                                                         className="btn btn-sm btn-danger"
                                                                         disabled={!commentInputs[asset.id]?.trim() || submitting[asset.id]}
                                                                     >
+                                                                        <FontAwesomeIcon icon={faCommentDots} className="me-2" />
                                                                         {submitting[asset.id] ? 'Submitting...' : 'Add Comment'}
                                                                     </button>
                                                                     <button

@@ -1,5 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import moment from 'moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUsers, faPlus, faEye, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Header from '@/Components/Header';
 
 export default function Index({ employees, flash }) {
@@ -25,9 +27,10 @@ export default function Index({ employees, flash }) {
                 )}
 
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h1>Employees</h1>
+                    <h1><FontAwesomeIcon icon={faUsers} className="me-2" />Employees</h1>
                     {user?.role !== 'user' && (
                         <Link href={route('employees.create')} className="btn btn-danger">
+                            <FontAwesomeIcon icon={faPlus} className="me-2" />
                             Add New Employee
                         </Link>
                     )}
@@ -70,6 +73,7 @@ export default function Index({ employees, flash }) {
                                                 href={route('employees.show', employee.id)}
                                                 className="btn btn-sm btn-outline-success me-2"
                                             >
+                                                <FontAwesomeIcon icon={faEye} className="me-1" />
                                                 View
                                             </Link>
                                             {user?.role !== 'user' && (
@@ -78,6 +82,7 @@ export default function Index({ employees, flash }) {
                                                         href={route('employees.edit', employee.id)}
                                                         className="btn btn-sm btn-outline-primary me-2"
                                                     >
+                                                        <FontAwesomeIcon icon={faEdit} className="me-1" />
                                                         Edit
                                                     </Link>
                                                     {user?.role !== 'encoder' && (
@@ -86,6 +91,7 @@ export default function Index({ employees, flash }) {
                                                             className="btn btn-sm btn-outline-danger"
                                                             disabled={processing}
                                                         >
+                                                            <FontAwesomeIcon icon={faTrash} className="me-1" />
                                                             Delete
                                                         </button>
                                                     )}

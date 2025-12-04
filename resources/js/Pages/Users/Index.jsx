@@ -1,5 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import moment from 'moment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faUserPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Header from '@/Components/Header';
 
 export default function Index({ users, flash }) {
@@ -39,8 +41,9 @@ export default function Index({ users, flash }) {
                 )}
 
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h1>User Management</h1>
+                    <h1><FontAwesomeIcon icon={faUser} className="me-2" />User Management</h1>
                     <Link href={route('users.create')} className="btn btn-danger">
+                        <FontAwesomeIcon icon={faUserPlus} className="me-2" />
                         Add New User
                     </Link>
                 </div>
@@ -77,6 +80,7 @@ export default function Index({ users, flash }) {
                                                 href={route('users.edit', user.id)}
                                                 className="btn btn-sm btn-outline-primary me-2"
                                             >
+                                                <FontAwesomeIcon icon={faEdit} className="me-1" />
                                                 Edit
                                             </Link>
                                             <button
@@ -84,6 +88,7 @@ export default function Index({ users, flash }) {
                                                 className="btn btn-sm btn-outline-danger"
                                                 disabled={processing}
                                             >
+                                                <FontAwesomeIcon icon={faTrash} className="me-1" />
                                                 Delete
                                             </button>
                                         </td>

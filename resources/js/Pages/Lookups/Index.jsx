@@ -1,6 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCog, faArrowLeft, faPlus, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Header from '@/Components/Header';
 
 export default function Index({ categories, brands, suppliers }) {
@@ -201,7 +203,8 @@ export default function Index({ categories, brands, suppliers }) {
                         onClick={() => handleOpenAddModal(type)}
                         disabled={loading}
                     >
-                        + Add New
+                        <FontAwesomeIcon icon={faPlus} className="me-2" />
+                        Add New
                     </button>
                 </div>
                 <div className="card-body">
@@ -243,6 +246,7 @@ export default function Index({ categories, brands, suppliers }) {
                                                         onClick={() => handleOpenEditModal(item, type)}
                                                         disabled={loading}
                                                     >
+                                                        <FontAwesomeIcon icon={faEdit} className="me-1" />
                                                         Edit
                                                     </button>
                                                     <button
@@ -252,6 +256,7 @@ export default function Index({ categories, brands, suppliers }) {
                                                         disabled={loading || item.usage_count > 0}
                                                         title={item.usage_count > 0 ? `Cannot delete: used by ${item.usage_count} asset(s)` : 'Delete'}
                                                     >
+                                                        <FontAwesomeIcon icon={faTrash} className="me-1" />
                                                         Delete
                                                     </button>
                                                 </div>
@@ -273,8 +278,9 @@ export default function Index({ categories, brands, suppliers }) {
             <Header activePage="lookups" />
             <div className="container my-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h1>Lookup Management</h1>
+                    <h1><FontAwesomeIcon icon={faCog} className="me-2" />Lookup Management</h1>
                     <Link href={route('assets.index')} className="btn btn-secondary">
+                        <FontAwesomeIcon icon={faArrowLeft} className="me-2" />
                         Back to Assets
                     </Link>
                 </div>

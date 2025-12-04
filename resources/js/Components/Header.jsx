@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBox, faUsers, faUserShield, faCog, faSignOutAlt, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 import LogoutModal from './LogoutModal';
 
 export default function Header({ activePage = 'assets' }) {
@@ -21,6 +23,7 @@ export default function Header({ activePage = 'assets' }) {
                             href={route('assets.index')} 
                             className={`nav-link px-2 ${activePage === 'assets' ? 'text-danger' : 'text-secondary'}`}
                         >
+                            <FontAwesomeIcon icon={faBox} className="me-1" />
                             Assets
                         </Link>
                     </li>
@@ -29,6 +32,7 @@ export default function Header({ activePage = 'assets' }) {
                             href={route('employees.index')} 
                             className={`nav-link px-2 ${activePage === 'employees' ? 'text-danger' : 'text-secondary'}`}
                         >
+                            <FontAwesomeIcon icon={faUsers} className="me-1" />
                             Employees
                         </Link>
                     </li>
@@ -39,6 +43,7 @@ export default function Header({ activePage = 'assets' }) {
                                     href={route('users.index')} 
                                     className={`nav-link px-2 ${activePage === 'users' ? 'text-danger' : 'text-secondary'}`}
                                 >
+                                    <FontAwesomeIcon icon={faUserShield} className="me-1" />
                                     Users
                                 </Link>
                             </li>
@@ -47,6 +52,7 @@ export default function Header({ activePage = 'assets' }) {
                                     href={route('lookups.index')} 
                                     className={`nav-link px-2 ${activePage === 'lookups' ? 'text-danger' : 'text-secondary'}`}
                                 >
+                                    <FontAwesomeIcon icon={faCog} className="me-1" />
                                     Lookups
                                 </Link>
                             </li>
@@ -67,6 +73,7 @@ export default function Header({ activePage = 'assets' }) {
                                 }}
                                 className="btn btn-danger"
                             >
+                                <FontAwesomeIcon icon={faSignOutAlt} className="me-2" />
                                 Logout
                             </button>
                         </div>
@@ -76,6 +83,7 @@ export default function Header({ activePage = 'assets' }) {
                             className="btn btn-outline-danger me-2"
                             style={{ cursor: 'pointer' }}
                         >
+                            <FontAwesomeIcon icon={faSignInAlt} className="me-2" />
                             Login
                         </Link>
                     )}
