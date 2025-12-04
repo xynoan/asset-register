@@ -43,10 +43,10 @@ export default function Edit({ asset, employees }) {
                 return [];
             }
         }
-        // Ensure all notes have added_by field, defaulting to 'System' if missing
+        // Ensure all notes have added_by field, defaulting to authenticated user or 'Unknown User' if missing
         return notesArray.map(note => ({
             ...note,
-            added_by: note.added_by || 'System'
+            added_by: note.added_by || auth?.user?.name || 'Unknown User'
         }));
     };
 
@@ -66,7 +66,7 @@ export default function Edit({ asset, employees }) {
                 return [];
             }
         }
-        // Ensure all comments have added_by field, defaulting to 'System' if missing
+        // Ensure all comments have added_by field, defaulting to authenticated user or 'Unknown User' if missing
         // Format date to YYYY-MM-DD for HTML date input if it exists
         return commentsArray.map(comment => {
             let formattedDate = comment.date || '';
@@ -84,7 +84,7 @@ export default function Edit({ asset, employees }) {
             return {
                 ...comment,
                 date: formattedDate,
-                added_by: comment.added_by || 'System'
+                added_by: comment.added_by || auth?.user?.name || 'Unknown User'
             };
         });
     };
@@ -213,7 +213,7 @@ export default function Edit({ asset, employees }) {
     const addNote = () => {
         setData('notes', [
             ...data.notes,
-            { date: '', note: '', added_by: 'System' }
+            { date: '', note: '', added_by: auth?.user?.name || 'Unknown User' }
         ]);
     };
 
@@ -232,7 +232,7 @@ export default function Edit({ asset, employees }) {
     const addComment = () => {
         setData('comments_history', [
             ...data.comments_history,
-            { date: '', comment: '', added_by: 'System' }
+            { date: '', comment: '', added_by: auth?.user?.name || 'Unknown User' }
         ]);
     };
 

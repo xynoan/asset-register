@@ -121,7 +121,7 @@ export default function Create({ employees }) {
     const addNote = () => {
         setData('notes', [
             ...data.notes,
-            { date: '', note: '', added_by: 'System' }
+            { date: '', note: '', added_by: auth?.user?.name || 'Unknown User' }
         ]);
     };
 
@@ -140,7 +140,7 @@ export default function Create({ employees }) {
     const addComment = () => {
         setData('comments_history', [
             ...data.comments_history,
-            { date: '', comment: '', added_by: 'System' }
+            { date: '', comment: '', added_by: auth?.user?.name || 'Unknown User' }
         ]);
     };
 
